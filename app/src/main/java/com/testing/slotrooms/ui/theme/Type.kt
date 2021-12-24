@@ -12,7 +12,8 @@ import com.testing.slotrooms.R
 val MainFont = FontFamily(
     Font(resId = R.font.montserrat_black, weight = FontWeight.Black, style = FontStyle.Normal),
     Font(resId = R.font.montserrat_light, weight = FontWeight.Light, style = FontStyle.Normal),
-    Font(resId = R.font.montserrat_regular, weight = FontWeight.Normal, style = FontStyle.Normal)
+    Font(resId = R.font.montserrat_regular, weight = FontWeight.Normal, style = FontStyle.Normal),
+    Font(resId = R.font.montserrat_bold, weight = FontWeight.Bold, style = FontStyle.Normal),
 )
 
 // Set of Material typography styles to start with
@@ -26,7 +27,19 @@ val Typography = Typography(
         fontFamily = MainFont,
         fontWeight = FontWeight.Black,
         fontSize = 36.sp
+    ),
+    h3 = TextStyle(
+        fontFamily = MainFont,
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp
+    ),
+    h4 = TextStyle(
+        fontFamily = MainFont,
+        fontWeight = FontWeight.Bold,
+        fontSize = 12.sp,
+        color = GreyFont
     )
+
     /* Other default text styles to override
     button = TextStyle(
         fontFamily = FontFamily.Default,

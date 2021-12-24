@@ -11,6 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.testing.slotrooms.presentation.slots.SlotsScreen
 import com.testing.slotrooms.presentation.slots.SlotsViewModel
+import com.testing.slotrooms.ui.theme.MainBackground
 import com.testing.slotrooms.ui.theme.SlotRoomsTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,7 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             SlotRoomsTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background) {
+                Surface(color = MainBackground) {
                     val slotsViewModel = viewModel<SlotsViewModel>()
                     SlotsScreen(viewModel = slotsViewModel)
                 }
@@ -37,6 +38,8 @@ fun Greeting(name: String) {
 @Composable
 fun DefaultPreview() {
     SlotRoomsTheme {
-        Greeting("Android")
+//        Greeting(name = "WORLD!")
+        val slotsViewModel = viewModel<SlotsViewModel>()
+        SlotsScreen(viewModel = slotsViewModel)
     }
 }

@@ -1,6 +1,7 @@
 package com.testing.slotrooms.presentation.slots
 
 import android.content.res.Resources
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,11 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.testing.slotrooms.R
 import com.testing.slotrooms.domain.slots.SlotsModel
+import com.testing.slotrooms.ui.theme.GreenMain
+import com.testing.slotrooms.ui.theme.YellowMain
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -22,6 +27,7 @@ import java.util.*
 fun SlotsScreen(
     viewModel: SlotsViewModel
 ) {
+
     val slots = viewModel.slots
     Column() {
         Text(
@@ -52,12 +58,17 @@ fun SlotRow(slot : SlotsModel, calendar: Calendar) {
     val timeTextFinish = SimpleDateFormat("HH.mm").format(slot.finishMeeting)
     val timeMeeting = "$timeTextStart - $timeTextFinish"
     val dateMeeting = SimpleDateFormat("dd MMMM").format(slot.finishMeeting)
-    Row() {
-        Column() {
-            Text(text = timeMeeting)
-            Text(text = dateMeeting)
+    val backgroundColorSlot = if (slot.owner.name.isNullOrEmpty()) {
+        GreenMain
+    } else {
+        YellowMain
+    }
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 0.dp).background(backgroundColorSlot)) {
+        Column(modifier = Modifier.padding(16.dp).align(Alignment.CenterVertically)) {
+            Text(text = timeMeeting, style = MaterialTheme.typography.h3)
+            Text(text = dateMeeting, style = MaterialTheme.typography.h4)
         }
-        Column(modifier = Modifier.align(Alignment.Bottom)) {
+        Column(modifier = Modifier.align(Alignment.CenterVertically)) {
             Text(text = slot.roomName)
             Text(text = slot.owner.name)
         }

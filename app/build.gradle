@@ -67,4 +67,6 @@ dependencies {
 
     def lifecycle_version = "2.4.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
+
+    implementation "androidx.ui:ui-framework:0.1.0-dev03"
 }
