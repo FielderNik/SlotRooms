@@ -1,58 +1,98 @@
 package com.testing.slotrooms.presentation.slots
 
-import android.content.res.Resources
+import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.material.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.testing.slotrooms.R
 import com.testing.slotrooms.domain.slots.SlotsModel
+import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.ui.theme.GreenMain
+import com.testing.slotrooms.ui.theme.MainFont
 import com.testing.slotrooms.ui.theme.YellowMain
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun SlotsScreen(
-    viewModel: SlotsViewModel
+    viewModel: SlotsViewModel,
+    navController: NavController
 ) {
-
     val slots = viewModel.slots
-    Column() {
-        Text(
-            text = stringResource(id = R.string.title_slots),
-            style = MaterialTheme.typography.h1,
-            modifier = Modifier.padding(20.dp)
-        )
-        SlotsList(slots = slots)
+    Log.d("milk","Hello")
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate(Screens.AddNewSlotScreen.route) },
+                backgroundColor = Color.Blue,
+                contentColor = Color.White
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_add_24),
+                    contentDescription = null
+                )
+            }
+        },
+        floatingActionButtonPosition = FabPosition.Center
+    ) {
+        Column {
+            ToolbarSlots()
+            SlotsList(slots = slots, navController = navController)
+        }
+
     }
 }
 
 @Composable
-fun SlotsList(slots: List<SlotsModel>) {
+fun ToolbarSlots() {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
+            contentDescription = null
+        )
+        Text(
+            text = stringResource(id = R.string.title_slots),
+            style = MaterialTheme.typography.h1,
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center
+        )
+        Icon(
+            painter = painterResource(id = R.drawable.ic_baseline_filter_list_24),
+            contentDescription = null
+        )
+    }
+}
+
+@Composable
+fun SlotsList(slots: List<SlotsModel>, navController: NavController) {
     val calendar = Calendar.getInstance(Locale.ROOT)
     LazyColumn(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         items(slots) { slot ->
-            SlotRow(slot = slot, calendar = calendar)
+            SlotRow(slot = slot, calendar = calendar, navController = navController)
         }
     }
 }
 
 @Composable
-fun SlotRow(slot : SlotsModel, calendar: Calendar) {
+fun SlotRow(slot: SlotsModel, calendar: Calendar, navController: NavController) {
     calendar.get(Calendar.HOUR)
     val timeTextStart = SimpleDateFormat("HH.mm").format(slot.startMeeting)
     val timeTextFinish = SimpleDateFormat("HH.mm").format(slot.finishMeeting)
@@ -63,24 +103,109 @@ fun SlotRow(slot : SlotsModel, calendar: Calendar) {
     } else {
         YellowMain
     }
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 0.dp).background(backgroundColorSlot)) {
-        Column(modifier = Modifier.padding(16.dp).align(Alignment.CenterVertically)) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .background(backgroundColorSlot)
+            .clickable {
+                navController.navigate(Screens.AddNewSlotScreen.route + "/" + false)
+            }
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1F)
+                .padding(start = 16.dp, top = 16.dp, bottom = 12.dp)
+        ) {
             Text(text = timeMeeting, style = MaterialTheme.typography.h3)
-            Text(text = dateMeeting, style = MaterialTheme.typography.h4)
+            Text(
+                text = dateMeeting,
+                style = MaterialTheme.typography.h4,
+                modifier = Modifier.padding(top = 16.dp)
+            )
         }
-        Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-            Text(text = slot.roomName)
-            Text(text = slot.owner.name)
+        Column(
+            modifier = Modifier
+                .padding(end = 16.dp, top = 16.dp)
+        ) {
+            Text(
+                text = slot.roomName,
+                style = TextStyle(
+                    fontFamily = MainFont,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+            )
+            Image(
+                painter = painterResource(id = R.drawable.avatar1),
+                contentDescription = "${slot.owner}",
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(top = 16.dp)
+                    .size(24.dp)
+
+            )
         }
     }
-//    Column() {
-//        Row() {
-//            Text(text = timeMeeting)
-//            Text(text = dateMeeting)
-//        }
-//        Row() {
-//            Text(text = slot.roomName)
-//            Text(text = slot.owner.name)
-//        }
-//    }
+
 }
+
+/*
+@Preview
+@Composable
+fun SlotRow_Preview(application: Application) {
+    val viewModel = SlotsViewModel(application)
+    val slot = viewModel.slots[0]
+    val calendar = Calendar.getInstance(Locale.ROOT)
+    calendar.get(Calendar.HOUR)
+    val timeTextStart = SimpleDateFormat("HH.mm").format(slot.startMeeting)
+    val timeTextFinish = SimpleDateFormat("HH.mm").format(slot.finishMeeting)
+    val timeMeeting = "$timeTextStart - $timeTextFinish"
+    val dateMeeting = SimpleDateFormat("dd MMMM").format(slot.finishMeeting)
+    val backgroundColorSlot = if (slot.owner.name.isNullOrEmpty()) {
+        GreenMain
+    } else {
+        YellowMain
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .background(backgroundColorSlot)
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1F)
+                .padding(start = 16.dp, top = 16.dp, bottom = 12.dp)
+        ) {
+            Text(text = timeMeeting, style = MaterialTheme.typography.h3)
+            Text(
+                text = dateMeeting,
+                style = MaterialTheme.typography.h4,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+        }
+        Column(
+            modifier = Modifier
+                .padding(end = 16.dp, top = 16.dp)
+        ) {
+            Text(
+                text = slot.roomName,
+                style = TextStyle(
+                    fontFamily = MainFont,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+            )
+            Image(
+                painter = painterResource(id = R.drawable.avatar1),
+                contentDescription = "${slot.owner}",
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(top = 16.dp)
+                    .size(24.dp)
+
+            )
+        }
+    }
+}*/

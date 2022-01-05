@@ -3,4 +3,6 @@
 
     <!--titles-->
     <string name="title_slots">Slots</string>
+    <string name="title_new_slot">New slot</string>
+    <string name="title_edit_slot">Edit slot</string>
 </resources>
