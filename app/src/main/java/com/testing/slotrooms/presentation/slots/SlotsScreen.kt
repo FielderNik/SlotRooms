@@ -35,11 +35,12 @@ fun SlotsScreen(
     navController: NavController
 ) {
     val slots = viewModel.slots
-    Log.d("milk","Hello")
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate(Screens.AddNewSlotScreen.route) },
+                onClick = {
+                    navController.navigate(Screens.AddNewSlotScreen.passIsNewSlot(true))
+                },
                 backgroundColor = Color.Blue,
                 contentColor = Color.White
             ) {
@@ -109,7 +110,7 @@ fun SlotRow(slot: SlotsModel, calendar: Calendar, navController: NavController) 
             .padding(vertical = 4.dp)
             .background(backgroundColorSlot)
             .clickable {
-                navController.navigate(Screens.AddNewSlotScreen.route + "/" + false)
+                navController.navigate(Screens.AddNewSlotScreen.passIsNewSlot(false))
             }
     ) {
         Column(
