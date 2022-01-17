@@ -5,4 +5,8 @@
     <string name="title_slots">Slots</string>
     <string name="title_new_slot">New slot</string>
     <string name="title_edit_slot">Edit slot</string>
+    <string name="title_dialog_choice_room">Choice room</string>
+
+    <!--actions-->
+    <string name="action_dismiss">Dismiss</string>
 </resources>

@@ -72,7 +72,7 @@ dependencies {
 
     implementation "androidx.ui:ui-framework:0.1.0-dev03"
 
-    def room_version = "2.4.0"
+    def room_version = "2.4.1"
 
     implementation "androidx.room:room-runtime:$room_version"
 //    annotationProcessor "androidx.room:room-compiler:$room_version"
@@ -81,4 +81,5 @@ dependencies {
 //    ksp "androidx.room:room-compiler:$room_version"
 
     implementation "androidx.navigation:navigation-compose:2.4.0-rc01"
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0-rc02"
 }
