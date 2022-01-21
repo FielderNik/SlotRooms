@@ -40,10 +40,10 @@ abstract class SlotsDatabase : RoomDatabase() {
         private fun insertDefaultData(db: SlotsDatabase) {
             val slotDao = db.slotsDao()
             slotDao.insertUser(
-                Users(name = "Alex")
+                Users(id = 99, name = "Alex")
             )
             slotDao.insertRoom(
-                Rooms(name = "Room Office")
+                Rooms(id = 99, name = "Room Office")
             )
 
             slotDao.insertSlot(

@@ -11,8 +11,12 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 class SlotsViewModel() : ViewModel() {
-
     var db: SlotsDatabase = SlotsDatabase.getDatabase(SlotsApplication.appContext)
+
+    init {
+
+
+    }
 
     fun addUser() {
         viewModelScope.launch (Dispatchers.IO) {

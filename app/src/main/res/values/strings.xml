@@ -6,7 +6,9 @@
     <string name="title_new_slot">New slot</string>
     <string name="title_edit_slot">Edit slot</string>
     <string name="title_dialog_choice_room">Choice room</string>
+    <string name="title_dialog_owners">Owners</string>
 
     <!--actions-->
     <string name="action_dismiss">Dismiss</string>
+    <string name="action_confirm">Confirm</string>
 </resources>
