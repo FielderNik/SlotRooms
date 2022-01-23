@@ -7,14 +7,15 @@ import android.widget.TimePicker
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Context
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -24,9 +25,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
 import com.google.android.material.timepicker.TimeFormat
 import com.testing.slotrooms.R
+import com.testing.slotrooms.presentation.views.buttons.ButtonCancel
+import com.testing.slotrooms.presentation.views.buttons.ButtonSave
+import com.testing.slotrooms.presentation.views.snackbars.ErrorSnackbar
+import com.testing.slotrooms.ui.theme.MainBackground
+import com.testing.slotrooms.utils.dateFormat
+import com.testing.slotrooms.utils.timeFormat
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,13 +42,31 @@ import java.util.*
 fun AddNewSlotScreen(
     isNewSlot: Boolean,
 ) {
-    Scaffold() {
+    val scaffoldState = rememberScaffoldState()
+    Scaffold(
+        scaffoldState = scaffoldState,
+        snackbarHost = { scaffoldState.snackbarHostState },
+        modifier = Modifier.fillMaxSize(),
+        backgroundColor = MainBackground
+
+    ) {
+
+
         Column {
             ToolbarAddNewSlot(isNewSlot)
-            RoomEditBlock()
+            RoomEditBlock(scaffoldState = scaffoldState)
+
+            ErrorSnackbar(
+                snackbarHostState = scaffoldState.snackbarHostState,
+                onDismiss = { scaffoldState.snackbarHostState.currentSnackbarData?.dismiss() },
+                modifier = Modifier.padding(top = 100.dp)
+            )
 
         }
+
+
     }
+
 }
 
 @Composable
@@ -70,43 +95,48 @@ fun ToolbarAddNewSlot(
 @Composable
 fun RoomEditBlock(
     viewModel: AddNewSlotViewModel = viewModel<AddNewSlotViewModelImpl>(),
+    scaffoldState: ScaffoldState
 ) {
     val activity = LocalContext.current as AppCompatActivity
     val viewState = viewModel.addNewSlotState.collectAsState()
     val slotRoom = viewModel.slotRoom.collectAsState()
+    val effectState = viewModel.effect.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
-    val beginDateMillis = remember {
-        mutableStateOf(0L)
-    }
-
-    val choiceDialogState = remember {
-        mutableStateOf(SlotDialog())
-    }
     when (val state = viewState.value) {
         is AddNewSlotState.OpenSlotDialog -> {
             ChoiceDialogView(dialogType = state.dialogType, viewModel = viewModel)
         }
         is AddNewSlotState.DisplaySlotState -> {
-            choiceDialogState.value = SlotDialog(isOpen = false)
+
         }
         is AddNewSlotState.OpenDatePicker -> {
-            showDatePicker2(activity = activity) {
-                beginDateMillis.value = it ?: 0L
-                if (state.isBegin) {
-                    viewModel.handleEvent(AddNewSlotEvent.SelectedBeginDateEvent(it))
-                } else {
-                    viewModel.handleEvent(AddNewSlotEvent.SelectedEndDateEvent(it))
-                }
-            }
+            showDatePicker2(
+                activity = activity,
+                updatedDate = {
+                    if (state.isBegin) {
+                        viewModel.handleEvent(AddNewSlotEvent.SelectedBeginDateEvent(it))
+                    } else {
+                        viewModel.handleEvent(AddNewSlotEvent.SelectedEndDateEvent(it))
+                    }
+                },
+                onDismiss = {
+                    viewModel.handleEvent(AddNewSlotEvent.OnDialogDismissClicked)
+                })
         }
         is AddNewSlotState.OpenTimePicker -> {
-            showTimePicker2(activity = activity) { hour, minute ->
-                if (state.isBegin) {
-                    viewModel.handleEvent(AddNewSlotEvent.SelectedBeginTimeEvent(hour, minute))
-                } else {
-                    viewModel.handleEvent(AddNewSlotEvent.SelectedEndTimeEvent(hour, minute))
-                }
-            }
+            showTimePicker2(
+                activity = activity,
+                updatedTime = { hour, minute ->
+                    if (state.isBegin) {
+                        viewModel.handleEvent(AddNewSlotEvent.SelectedBeginTimeEvent(hour, minute))
+                    } else {
+                        viewModel.handleEvent(AddNewSlotEvent.SelectedEndTimeEvent(hour, minute))
+                    }
+                },
+                onDismiss = {
+                    viewModel.handleEvent(AddNewSlotEvent.OnDialogDismissClicked)
+                })
         }
         is AddNewSlotState.OpenCommentDialog -> {
             CommentDialog(
@@ -121,64 +151,61 @@ fun RoomEditBlock(
 
     }
 
-    val scaffoldState = rememberScaffoldState()
-    val coroutineScope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect {
+            it?.let {
+                when (it) {
+                    is AddNewSlotEvent.AddNewSlotError -> {
+                        coroutineScope.launch {
+                            scaffoldState.snackbarHostState.showSnackbar(it.message)
+                            viewModel.resetErrorStatus()
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        SlotContentView(title = "Room", content = slotRoom.value.roomName, onClick = {
+        SlotContentView(title = stringResource(id = R.string.title_room), content = slotRoom.value.roomName, onClick = {
             viewModel.handleEvent(AddNewSlotEvent.OnDialogClicked(DialogType.ROOM))
-
         })
         SlotDateView(
-            title = "Begin",
-            date = slotRoom.value.beginDate,
-            time = slotRoom.value.beginTime,
+            title = stringResource(id = R.string.title_begin),
+            dateTimeMillis = slotRoom.value.beginDateTime,
             onDateClick = {
                 viewModel.handleEvent(AddNewSlotEvent.DatePickerClicked(isBegin = true))
             },
             onTimeClick = {
                 viewModel.handleEvent(AddNewSlotEvent.TimePickerClicked(isBegin = true))
             })
-
         SlotDateView(
-            title = "End",
-            date = slotRoom.value.endDate,
-            time = slotRoom.value.endTime,
+            title = stringResource(id = R.string.title_end),
+            dateTimeMillis = slotRoom.value.endDateTime,
             onDateClick = {
                 viewModel.handleEvent(AddNewSlotEvent.DatePickerClicked(isBegin = false))
-/*                showDatePicker2(activity = activity) {
-                    endDateMillis.value = it ?: 0L
-                    if (endDateMillis.value < beginDateMillis.value) {
-                        coroutineScope.launch {
-                            val result = snackbarHostState.showSnackbar("Fire in the home", "go")
-                            when(result) {
-                                SnackbarResult.Dismissed -> {}
-
-                                        SnackbarResult.ActionPerformed -> {}
-                            }
-                        }
-                    } else {
-                        endDate.value = it.dateFormat(template = dateTemplate)
-                    }
-                }*/
             },
             onTimeClick = {
                 viewModel.handleEvent(AddNewSlotEvent.TimePickerClicked(isBegin = false))
             })
-
-        SlotContentView(title = "Owner", content = slotRoom.value.owner, onClick = {
+        SlotContentView(title = stringResource(id = R.string.title_owner), content = slotRoom.value.owner, onClick = {
             viewModel.handleEvent(AddNewSlotEvent.OnDialogClicked(DialogType.OWNER))
         })
-
-        SlotContentView(title = "Comment", content = slotRoom.value.comments, onClick = {
+        SlotContentView(title = stringResource(id = R.string.title_comment), content = slotRoom.value.comments, onClick = {
             viewModel.handleEvent(AddNewSlotEvent.CommentClicked)
         })
+
+        Spacer(modifier = Modifier.height(16.dp))
+        ButtonBlock(
+            onSaveClicked = {
+                viewModel.handleEvent(AddNewSlotEvent.SaveSlotEvent)
+            },
+            onCancelClicked = {
+                viewModel.handleEvent(AddNewSlotEvent.CancelSlotEvent)
+            }
+        )
+
     }
-
-
-
-    SnackbarHost(hostState = snackbarHostState)
 
     LaunchedEffect(key1 = viewState, block = {
         viewModel.handleEvent(event = AddNewSlotEvent.EnterScreen)
@@ -226,6 +253,30 @@ fun AddNewSlotDisplayView(
     }
 }
 
+@Composable
+fun ButtonBlock(
+    onSaveClicked: () -> Unit,
+    onCancelClicked: () -> Unit
+) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+
+        ButtonCancel(
+            modifier = Modifier
+                .weight(1f)
+                .height(56.dp),
+            onClick = onCancelClicked
+        )
+        Spacer(modifier = Modifier.weight(0.1f))
+        ButtonSave(
+            modifier = Modifier
+                .weight(1f)
+                .height(56.dp),
+            onClick = onSaveClicked
+        )
+    }
+
+}
+
 
 @Composable
 fun SlotContentView(title: String, content: String, onClick: () -> Unit) {
@@ -251,8 +302,7 @@ fun SlotContentView(title: String, content: String, onClick: () -> Unit) {
 @Composable
 fun SlotDateView(
     title: String,
-    date: String,
-    time: String,
+    dateTimeMillis: Long = 0L,
     onDateClick: () -> Unit,
     onTimeClick: () -> Unit
 ) {
@@ -264,7 +314,7 @@ fun SlotDateView(
     )
     //content
     Row() {
-        Text(text = date,
+        Text(text = dateTimeMillis.dateFormat(),
             style = MaterialTheme.typography.h3,
             modifier = Modifier
                 .clickable {
@@ -273,7 +323,7 @@ fun SlotDateView(
                 .padding(top = 16.dp, bottom = 8.dp, end = 16.dp)
         )
 
-        Text(text = time,
+        Text(text = dateTimeMillis.timeFormat(),
             style = MaterialTheme.typography.h3,
             modifier = Modifier
                 .clickable {
@@ -314,12 +364,19 @@ private fun showDatePicker(
 
 private fun showDatePicker2(
     activity: AppCompatActivity,
-    updatedDate: (Long) -> Unit
+    updatedDate: (Long) -> Unit,
+    onDismiss: () -> Unit
 ) {
     val datePicker = MaterialDatePicker.Builder.datePicker().build()
     datePicker.show(activity.supportFragmentManager, datePicker.toString())
     datePicker.addOnPositiveButtonClickListener {
         updatedDate(it)
+    }
+    datePicker.addOnCancelListener {
+        onDismiss.invoke()
+    }
+    datePicker.addOnNegativeButtonClickListener {
+        onDismiss.invoke()
     }
 }
 
@@ -344,16 +401,23 @@ private fun showTimePicker(
 
 private fun showTimePicker2(
     activity: AppCompatActivity,
-    updatedTime: (Int, Int) -> Unit
+    updatedTime: (Int, Int) -> Unit,
+    onDismiss: () -> Unit
 ) {
     val timePicker = MaterialTimePicker.Builder()
         .setTimeFormat(TimeFormat.CLOCK_24H)
-        .setInputMode(INPUT_MODE_KEYBOARD)
         .build()
 
     timePicker.show(activity.supportFragmentManager, timePicker.toString())
     timePicker.addOnPositiveButtonClickListener {
         updatedTime(timePicker.hour, timePicker.minute)
+    }
+    timePicker.addOnCancelListener {
+        onDismiss.invoke()
+    }
+
+    timePicker.addOnNegativeButtonClickListener {
+        onDismiss.invoke()
     }
 
 }

@@ -1,5 +1,11 @@
 package com.testing.slotrooms.presentation.addnewslot
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.util.*
+
 sealed class AddNewSlotState {
     object EmptyState : AddNewSlotState()
     data class OpenSlotDialog(val dialogType: DialogType) : AddNewSlotState()
@@ -11,6 +17,7 @@ sealed class AddNewSlotState {
 
 sealed interface UI
 sealed interface Internal
+sealed interface Effects
 sealed class AddNewSlotEvent {
     class OnDialogClicked(val dialogType: DialogType) : AddNewSlotEvent(), UI
     object OnDialogDismissClicked: AddNewSlotEvent(), UI
@@ -28,6 +35,11 @@ sealed class AddNewSlotEvent {
     data class SelectedEndDateEvent(val endDateMillis: Long): AddNewSlotEvent(), UI
     data class SelectedEndTimeEvent(val endTimeHour: Int, val endTimeMinutes: Int): AddNewSlotEvent(), UI
     data class CommentSubmittedEvent(val comment: String): AddNewSlotEvent(), UI
+    object SaveSlotEvent : AddNewSlotEvent()
+    object CancelSlotEvent : AddNewSlotEvent()
+
+
+    data class AddNewSlotError(val message: String): AddNewSlotEvent(), Effects
 }
 
 sealed class AddNewSlotEffect {
@@ -41,9 +53,17 @@ data class SlotRoom(
     val endDate: String = "01 янв 2022",
     val endTime: String = "01 : 00",
     val owner: String = "Иванов Павел",
-    val comments: String = ""
+    val comments: String = "",
+    val beginDateTime: Long = 0L,
+    val endDateTime: Long = 0L,
+    ) {
 
-)
+    companion object {
+        fun getCurrentDate() : Long {
+            return LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toEpochSecond() * 1000L
+        }
+    }
+}
 
 data class SlotDialog(
     val dialogType: DialogType = DialogType.ROOM,

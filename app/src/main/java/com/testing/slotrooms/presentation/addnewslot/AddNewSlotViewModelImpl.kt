@@ -1,5 +1,6 @@
 package com.testing.slotrooms.presentation.addnewslot
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.testing.slotrooms.core.EventHandler
@@ -11,20 +12,31 @@ import kotlinx.coroutines.launch
 abstract class AddNewSlotViewModel : ViewModel(), EventHandler<AddNewSlotEvent> {
     abstract val addNewSlotState: StateFlow<AddNewSlotState>
     abstract val slotRoom: StateFlow<SlotRoom>
+    abstract val effect: StateFlow<Effects?>
 
     abstract val rooms: List<String>
     override fun handleEvent(event: AddNewSlotEvent) {}
+    open suspend fun resetErrorStatus() {}
 }
 
 class AddNewSlotViewModelImpl : AddNewSlotViewModel(), EventHandler<AddNewSlotEvent> {
     override val rooms = listOf("Office", "Cabinet", "Java room", "Angular room", "Office", "Cabinet", "Java room")
+
+    private val currentDate = SlotRoom.getCurrentDate()
     private val _addNewSlotState: MutableStateFlow<AddNewSlotState> = MutableStateFlow(AddNewSlotState.EmptyState)
     override val addNewSlotState: StateFlow<AddNewSlotState> = _addNewSlotState
 
-    private val _slotRoom: MutableStateFlow<SlotRoom> = MutableStateFlow(SlotRoom())
+    private val _slotRoom: MutableStateFlow<SlotRoom> = MutableStateFlow(SlotRoom(beginDateTime = currentDate, endDateTime = currentDate))
     override val slotRoom: StateFlow<SlotRoom> = _slotRoom
 
+    private val _effect: MutableStateFlow<Effects?> = MutableStateFlow(null)
+    override val effect: StateFlow<Effects?> = _effect
+
     private val dateTemplate = "dd MMM yyyy"
+
+    var error = AddNewSlotEvent.AddNewSlotError("--=Error=--")
+
+
 
 
     override fun handleEvent(event: AddNewSlotEvent) {
@@ -40,7 +52,7 @@ class AddNewSlotViewModelImpl : AddNewSlotViewModel(), EventHandler<AddNewSlotEv
     }
 
     private fun reduce(event: AddNewSlotEvent, currentState: AddNewSlotState.OpenCommentDialog) {
-        when(event) {
+        when (event) {
             is AddNewSlotEvent.CommentSubmittedEvent -> {
                 viewModelScope.launch {
                     _slotRoom.emit(_slotRoom.value.copy(comments = event.comment))
@@ -56,16 +68,31 @@ class AddNewSlotViewModelImpl : AddNewSlotViewModel(), EventHandler<AddNewSlotEv
     }
 
     private fun reduce(event: AddNewSlotEvent, currentState: AddNewSlotState.OpenTimePicker) {
-        when(event) {
+        when (event) {
             is AddNewSlotEvent.SelectedBeginTimeEvent -> {
+                val hourByMillis = event.beginTimeHour * 3600000L
+                val minutesByMillis = event.beginTimeMinutes * 60000L
+                val updatedBeginTime = _slotRoom.value.beginDateTime + hourByMillis + minutesByMillis
                 viewModelScope.launch {
                     _slotRoom.emit(_slotRoom.value.copy(beginTime = "${event.beginTimeHour} : ${event.beginTimeMinutes}"))
                     _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(slotRoom = _slotRoom.value))
+                    _slotRoom.value = _slotRoom.value.copy(beginDateTime = updatedBeginTime)
+                    Log.d("milk", "begin time by millis: ${_slotRoom.value.beginDateTime}")
                 }
             }
             is AddNewSlotEvent.SelectedEndTimeEvent -> {
+                val hourByMillis = event.endTimeHour * 3600000L
+                val minutesByMillis = event.endTimeMinutes * 60000L
+                val updatedEndTime = _slotRoom.value.endDateTime + hourByMillis + minutesByMillis
                 viewModelScope.launch {
                     _slotRoom.emit(_slotRoom.value.copy(endTime = "${event.endTimeHour} : ${event.endTimeMinutes}"))
+                    _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(slotRoom = _slotRoom.value))
+                    _slotRoom.value = _slotRoom.value.copy(endDateTime = updatedEndTime)
+                    Log.d("milk", "end time by millis: ${_slotRoom.value.endDateTime}")
+                }
+            }
+            is AddNewSlotEvent.OnDialogDismissClicked -> {
+                viewModelScope.launch {
                     _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(slotRoom = _slotRoom.value))
                 }
             }
@@ -73,21 +100,53 @@ class AddNewSlotViewModelImpl : AddNewSlotViewModel(), EventHandler<AddNewSlotEv
     }
 
     private fun reduce(event: AddNewSlotEvent, currentState: AddNewSlotState.OpenDatePicker) {
-        when(event) {
+        when (event) {
             is AddNewSlotEvent.SelectedBeginDateEvent -> {
                 viewModelScope.launch {
-                    _slotRoom.emit(_slotRoom.value.copy(beginDate = event.beginDateMillis.dateFormat(dateTemplate)))
+                    if ((event.beginDateMillis > _slotRoom.value.beginDateTime) && _slotRoom.value.beginDateTime != 0L) {
+                        _slotRoom.emit(
+                            _slotRoom.value.copy(
+                                beginDate = event.beginDateMillis.dateFormat(dateTemplate),
+                                beginDateTime = event.beginDateMillis,
+                                endDate = event.beginDateMillis.dateFormat(dateTemplate),
+                                endDateTime = event.beginDateMillis
+                            )
+                        )
+
+                        _effect.emit(error.copy("new1"))
+                    } else {
+                        _slotRoom.emit(
+                            _slotRoom.value.copy(
+                                beginDate = event.beginDateMillis.dateFormat(dateTemplate),
+                                beginDateTime = event.beginDateMillis
+                            )
+                        )
+                    }
                     _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(slotRoom = _slotRoom.value))
                 }
             }
             is AddNewSlotEvent.SelectedEndDateEvent -> {
                 viewModelScope.launch {
-                    _slotRoom.emit(_slotRoom.value.copy(endDate = event.endDateMillis.dateFormat(dateTemplate)))
+                    if (_slotRoom.value.beginDateTime > event.endDateMillis) {
+                        _effect.emit(error.copy("new1"))
+                    } else {
+                        _slotRoom.emit(
+                            _slotRoom.value.copy(
+                                endDate = event.endDateMillis.dateFormat(dateTemplate),
+                                endDateTime = event.endDateMillis
+                            )
+                        )
+                    }
                     _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(slotRoom = _slotRoom.value))
                 }
             }
         }
     }
+
+    override suspend fun resetErrorStatus() {
+        _effect.emit(null)
+    }
+
 
 
     private fun reduce(event: AddNewSlotEvent, currentState: AddNewSlotState.OpenSlotDialog) {
@@ -127,7 +186,45 @@ class AddNewSlotViewModelImpl : AddNewSlotViewModel(), EventHandler<AddNewSlotEv
             is AddNewSlotEvent.CommentClicked -> {
                 openCommentDialog()
             }
+            is AddNewSlotEvent.SaveSlotEvent -> {
+                saveSlot()
+            }
+            is AddNewSlotEvent.CancelSlotEvent -> {
+
+            }
         }
+    }
+
+    private fun saveSlot() {
+        viewModelScope.launch {
+            if(checkSlot()) {
+
+                Log.d("milk", "OK slot: ${slotRoom.value}")
+            } else {
+                Log.d("milk", "WRONG! slot: ${slotRoom.value}")
+            }
+
+        }
+    }
+
+    private suspend fun checkSlot(): Boolean {
+        var isChecked = true
+        val slotRoom = _slotRoom.value
+        if (slotRoom.roomName.isEmpty()) {
+            _effect.emit(AddNewSlotEvent.AddNewSlotError("Room is empty"))
+            isChecked = false
+        }
+        if (slotRoom.beginDateTime >= slotRoom.endDateTime) {
+            _effect.emit(AddNewSlotEvent.AddNewSlotError("Date is wrong"))
+            isChecked = false
+        }
+        if (slotRoom.owner.isEmpty()) {
+            _effect.emit(AddNewSlotEvent.AddNewSlotError("Owner is empty"))
+            isChecked = false
+        }
+
+
+        return isChecked
     }
 
     private fun openCommentDialog() {
@@ -178,6 +275,8 @@ class AddNewSlotViewModelImplPreview(override val rooms: List<String>) : AddNewS
     override val addNewSlotState: StateFlow<AddNewSlotState>
         get() = MutableStateFlow(AddNewSlotState.EmptyState)
     override val slotRoom: StateFlow<SlotRoom>
+        get() = TODO("Not yet implemented")
+    override val effect: StateFlow<Effects?>
         get() = TODO("Not yet implemented")
 
     override fun handleEvent(event: AddNewSlotEvent) {

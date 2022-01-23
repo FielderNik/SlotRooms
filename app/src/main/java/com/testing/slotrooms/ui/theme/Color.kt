@@ -10,3 +10,5 @@ val YellowMain = Color(0xFFFFD481)
 val GreenMain = Color(0xFFA0E189)
 val GreyFont = Color(0xFF727272)
 val MainBackground = Color(0xFFFFF7E3)
+val RedMain = Color(0xFFE6908C)
+
