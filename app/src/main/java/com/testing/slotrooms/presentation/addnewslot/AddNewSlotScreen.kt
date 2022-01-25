@@ -2,6 +2,7 @@ package com.testing.slotrooms.presentation.addnewslot
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.res.Resources
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +16,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,6 +33,7 @@ import com.testing.slotrooms.presentation.views.snackbars.ErrorSnackbar
 import com.testing.slotrooms.ui.theme.MainBackground
 import com.testing.slotrooms.utils.dateFormat
 import com.testing.slotrooms.utils.timeFormat
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -61,12 +62,8 @@ fun AddNewSlotScreen(
                 onDismiss = { scaffoldState.snackbarHostState.currentSnackbarData?.dismiss() },
                 modifier = Modifier.padding(top = 100.dp)
             )
-
         }
-
-
     }
-
 }
 
 @Composable
@@ -102,14 +99,13 @@ fun RoomEditBlock(
     val slotRoom = viewModel.slotRoom.collectAsState()
     val effectState = viewModel.effect.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val resources = LocalContext.current.resources
 
     when (val state = viewState.value) {
         is AddNewSlotState.OpenSlotDialog -> {
             ChoiceDialogView(dialogType = state.dialogType, viewModel = viewModel)
         }
-        is AddNewSlotState.DisplaySlotState -> {
-
-        }
+        is AddNewSlotState.DisplaySlotState -> { }
         is AddNewSlotState.OpenDatePicker -> {
             showDatePicker2(
                 activity = activity,
@@ -153,16 +149,13 @@ fun RoomEditBlock(
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect {
-            it?.let {
-                when (it) {
-                    is AddNewSlotEvent.AddNewSlotError -> {
-                        coroutineScope.launch {
-                            scaffoldState.snackbarHostState.showSnackbar(it.message)
-                            viewModel.resetErrorStatus()
-                        }
-                    }
-                }
-            }
+            handleEffect(
+                scaffoldState = scaffoldState,
+                coroutineScope = coroutineScope,
+                effect = it,
+                resources = resources
+            )
+            viewModel.resetErrorStatus()
         }
     }
 
@@ -219,6 +212,7 @@ fun ChoiceDialogView(
 ) {
     if (dialogType == DialogType.ROOM) {
         ChoiceRoomDialog(
+            viewModel = viewModel,
             onConfirmClicked = {
                 viewModel.handleEvent(AddNewSlotEvent.SelectedRoomEvent(it))
             },
@@ -229,6 +223,7 @@ fun ChoiceDialogView(
         )
     } else {
         ChoiceRoomDialog(
+            viewModel = viewModel,
             onConfirmClicked = {
                 viewModel.handleEvent(AddNewSlotEvent.SelectedOwnerEvent(it))
             },
@@ -240,18 +235,6 @@ fun ChoiceDialogView(
     }
 }
 
-@Composable
-fun AddNewSlotDisplayView(
-    viewState: AddNewSlotState.DisplaySlotState,
-    onChoiceRoomClicked: () -> Unit,
-) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        SlotContentView(title = "Room", content = viewState.slotRoom.roomName, onClick = onChoiceRoomClicked)
-
-        SlotContentView(title = "Owner", content = viewState.slotRoom.owner, onClick = {})
-        SlotContentView(title = "Comment", content = viewState.slotRoom.comments, onClick = {})
-    }
-}
 
 @Composable
 fun ButtonBlock(
@@ -422,22 +405,39 @@ private fun showTimePicker2(
 
 }
 
-@Composable
-fun ShowError(text: String) {
-    val scaffoldState = rememberScaffoldState()
-    val coroutineScope = rememberCoroutineScope()
-    Scaffold() {
-        coroutineScope.launch {
-            val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
-                message = text
-            )
-            when (snackbarResult) {
-                SnackbarResult.Dismissed -> {}
-                SnackbarResult.ActionPerformed -> {}
+
+private fun handleEffect(
+    scaffoldState: ScaffoldState,
+    coroutineScope: CoroutineScope,
+    effect: Effects?,
+    resources: Resources
+) {
+    effect?.let { effectEvent ->
+        when (effectEvent) {
+            is AddNewSlotEvent.AddNewSlotError -> {
+                coroutineScope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(effectEvent.message)
+                }
+            }
+            is AddNewSlotEvent.DateTimeError -> {
+                coroutineScope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_slot_date_time))
+                }
+            }
+            AddNewSlotEvent.OwnerEmptyError -> {
+                coroutineScope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_slot_owner_is_empty))
+                }
+            }
+            AddNewSlotEvent.RoomEmptyError -> {
+                coroutineScope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_slot_room_is_empty))
+                }
             }
         }
     }
 }
+
 
 @Preview
 @Composable

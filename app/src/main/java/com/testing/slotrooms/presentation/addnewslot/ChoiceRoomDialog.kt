@@ -24,7 +24,7 @@ import com.testing.slotrooms.presentation.views.buttons.TextButtonDismiss
 
 @Composable
 fun ChoiceRoomDialog(
-    viewModel: ChoiceRoomViewModel = viewModel(),
+    viewModel: AddNewSlotViewModel,
     onConfirmClicked: (responseData: String) -> Unit,
     onDismiss: () -> Unit,
     dialogType: DialogType
@@ -193,7 +193,7 @@ fun ChoiceRoomDialog2(
 @Composable
 fun ChoiceRoomDialog_Preview() {
     ChoiceRoomDialog(
-        viewModel = viewModel<ChoiceRoomViewModel>(),
+        viewModel = viewModel<AddNewSlotViewModelImplPreview>(),
         onConfirmClicked = { },
         onDismiss = {},
         dialogType = DialogType.ROOM

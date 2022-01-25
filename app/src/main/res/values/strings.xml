@@ -18,4 +18,9 @@
     <string name="action_confirm">Confirm</string>
     <string name="action_save">Save</string>
     <string name="action_cancel">Cancel</string>
+
+    <!--errors-->
+    <string name="error_slot_date_time">Begin time must be early end time</string>
+    <string name="error_slot_room_is_empty">Room must not be empty</string>
+    <string name="error_slot_owner_is_empty">Room must not be empty</string>
 </resources>

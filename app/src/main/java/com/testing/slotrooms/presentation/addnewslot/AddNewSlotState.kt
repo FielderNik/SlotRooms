@@ -40,6 +40,9 @@ sealed class AddNewSlotEvent {
 
 
     data class AddNewSlotError(val message: String): AddNewSlotEvent(), Effects
+    object DateTimeError: AddNewSlotEvent(), Effects
+    object RoomEmptyError: AddNewSlotEvent(), Effects
+    object OwnerEmptyError: AddNewSlotEvent(), Effects
 }
 
 sealed class AddNewSlotEffect {
