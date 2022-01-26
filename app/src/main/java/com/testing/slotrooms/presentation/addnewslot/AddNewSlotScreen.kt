@@ -1,12 +1,8 @@
 package com.testing.slotrooms.presentation.addnewslot
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.content.res.Resources
-import android.widget.DatePicker
-import android.widget.TimePicker
+import androidx.activity.compose.BackHandler
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -36,8 +32,6 @@ import com.testing.slotrooms.utils.timeFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
 
 @Composable
 fun AddNewSlotScreen(
@@ -52,8 +46,7 @@ fun AddNewSlotScreen(
 
     ) {
 
-
-        Column {
+        Column(modifier = Modifier.fillMaxSize()) {
             ToolbarAddNewSlot(isNewSlot)
             RoomEditBlock(scaffoldState = scaffoldState)
 
@@ -105,9 +98,9 @@ fun RoomEditBlock(
         is AddNewSlotState.OpenSlotDialog -> {
             ChoiceDialogView(dialogType = state.dialogType, viewModel = viewModel)
         }
-        is AddNewSlotState.DisplaySlotState -> { }
+        is AddNewSlotState.DisplaySlotState -> {}
         is AddNewSlotState.OpenDatePicker -> {
-            showDatePicker2(
+            showDatePicker(
                 activity = activity,
                 updatedDate = {
                     if (state.isBegin) {
@@ -121,7 +114,7 @@ fun RoomEditBlock(
                 })
         }
         is AddNewSlotState.OpenTimePicker -> {
-            showTimePicker2(
+            showTimePicker(
                 activity = activity,
                 updatedTime = { hour, minute ->
                     if (state.isBegin) {
@@ -194,6 +187,7 @@ fun RoomEditBlock(
                 viewModel.handleEvent(AddNewSlotEvent.SaveSlotEvent)
             },
             onCancelClicked = {
+
                 viewModel.handleEvent(AddNewSlotEvent.CancelSlotEvent)
             }
         )
@@ -319,33 +313,6 @@ fun SlotDateView(
 }
 
 private fun showDatePicker(
-    context: Context,
-    updatedDate: (String?) -> Unit
-) {
-    val year: Int
-    val month: Int
-    val day: Int
-    val calendar = Calendar.getInstance()
-    year = calendar.get(Calendar.YEAR)
-    month = calendar.get(Calendar.MONTH)
-    day = calendar.get(Calendar.DAY_OF_MONTH)
-    calendar.time = Date()
-
-    val datePicker = DatePickerDialog(
-        context,
-        { _: DatePicker, year: Int, monthOfYear: Int, dayOfMonth: Int ->
-            calendar.set(year, monthOfYear, dayOfMonth)
-            val formatDate = SimpleDateFormat("dd MMM yyyy")
-            val date = formatDate.format(calendar.time)
-            updatedDate(date)
-        }, year, month, day
-    )
-
-    datePicker.show()
-
-}
-
-private fun showDatePicker2(
     activity: AppCompatActivity,
     updatedDate: (Long) -> Unit,
     onDismiss: () -> Unit
@@ -363,26 +330,8 @@ private fun showDatePicker2(
     }
 }
 
+
 private fun showTimePicker(
-    context: Context,
-    updatedTime: (String?) -> Unit
-) {
-    val hours: Int
-    val minutes: Int
-    val calendar = Calendar.getInstance()
-    hours = calendar.get(Calendar.HOUR)
-    minutes = calendar.get(Calendar.MINUTE)
-
-    val timePicker = TimePickerDialog(
-        context,
-        { _: TimePicker, hour: Int, minutes: Int ->
-
-        }, hours, minutes, true
-    )
-    timePicker.show()
-}
-
-private fun showTimePicker2(
     activity: AppCompatActivity,
     updatedTime: (Int, Int) -> Unit,
     onDismiss: () -> Unit

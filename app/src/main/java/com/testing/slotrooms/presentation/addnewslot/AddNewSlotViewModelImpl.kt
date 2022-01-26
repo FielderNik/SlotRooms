@@ -110,13 +110,12 @@ class AddNewSlotViewModelImpl : AddNewSlotViewModel(), EventHandler<AddNewSlotEv
                         _effect.emit(AddNewSlotEvent.DateTimeError)
                         _slotRoom.emit(
                             _slotRoom.value.copy(
-                                beginDateTime = _slotRoom.value.endDateTime
+                                beginDateTime = updatedBeginTime,
+                                endDateTime = updatedBeginTime
                             )
                         )
                     } else {
-                        _slotRoom.emit(_slotRoom.value.copy(beginTime = "${event.beginTimeHour} : ${event.beginTimeMinutes}"))
                         _slotRoom.value = _slotRoom.value.copy(beginDateTime = updatedBeginTime)
-                        Log.d("milk", "begin time by millis: ${_slotRoom.value.beginDateTime}")
                     }
                     _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(slotRoom = _slotRoom.value))
                 }
@@ -124,7 +123,7 @@ class AddNewSlotViewModelImpl : AddNewSlotViewModel(), EventHandler<AddNewSlotEv
             is AddNewSlotEvent.SelectedEndTimeEvent -> {
                 val hourByMillis = event.endTimeHour * 3600000L
                 val minutesByMillis = event.endTimeMinutes * 60000L
-                val currentStartDay = atStartOfDay(Date(_slotRoom.value.beginDateTime))?.time ?: 0L
+                val currentStartDay = atStartOfDay(Date(_slotRoom.value.endDateTime))?.time ?: 0L
                 val updatedEndTime = currentStartDay + hourByMillis + minutesByMillis
                 viewModelScope.launch {
                     if (updatedEndTime < _slotRoom.value.beginDateTime) {
@@ -135,9 +134,7 @@ class AddNewSlotViewModelImpl : AddNewSlotViewModel(), EventHandler<AddNewSlotEv
                             )
                         )
                     } else {
-                        _slotRoom.emit(_slotRoom.value.copy(endTime = "${event.endTimeHour} : ${event.endTimeMinutes}"))
                         _slotRoom.value = _slotRoom.value.copy(endDateTime = updatedEndTime)
-                        Log.d("milk", "end time by millis: ${_slotRoom.value.endDateTime}")
                     }
                     _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(slotRoom = _slotRoom.value))
                 }
@@ -154,21 +151,17 @@ class AddNewSlotViewModelImpl : AddNewSlotViewModel(), EventHandler<AddNewSlotEv
         when (event) {
             is AddNewSlotEvent.SelectedBeginDateEvent -> {
                 viewModelScope.launch {
-                    if ((event.beginDateMillis > _slotRoom.value.beginDateTime) && _slotRoom.value.beginDateTime != 0L) {
+                    if (event.beginDateMillis > _slotRoom.value.endDateTime) {
                         _slotRoom.emit(
                             _slotRoom.value.copy(
-                                beginDate = event.beginDateMillis.dateFormat(dateTemplate),
                                 beginDateTime = event.beginDateMillis,
-                                endDate = event.beginDateMillis.dateFormat(dateTemplate),
                                 endDateTime = event.beginDateMillis
                             )
                         )
-
                         _effect.emit(AddNewSlotEvent.DateTimeError)
                     } else {
                         _slotRoom.emit(
                             _slotRoom.value.copy(
-                                beginDate = event.beginDateMillis.dateFormat(dateTemplate),
                                 beginDateTime = event.beginDateMillis
                             )
                         )
@@ -183,7 +176,6 @@ class AddNewSlotViewModelImpl : AddNewSlotViewModel(), EventHandler<AddNewSlotEv
                     } else {
                         _slotRoom.emit(
                             _slotRoom.value.copy(
-                                endDate = event.endDateMillis.dateFormat(dateTemplate),
                                 endDateTime = event.endDateMillis
                             )
                         )

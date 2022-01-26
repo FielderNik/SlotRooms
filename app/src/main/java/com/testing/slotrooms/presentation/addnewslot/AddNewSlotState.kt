@@ -51,11 +51,7 @@ sealed class AddNewSlotEffect {
 
 data class SlotRoom(
     val roomName: String = "Choice room",
-    val beginDate: String = "01 янв 2022",
-    val beginTime: String = "00 : 00",
-    val endDate: String = "01 янв 2022",
-    val endTime: String = "01 : 00",
-    val owner: String = "Иванов Павел",
+    val owner: String = "",
     val comments: String = "",
     val beginDateTime: Long = 0L,
     val endDateTime: Long = 0L,
