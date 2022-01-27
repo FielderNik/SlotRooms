@@ -23,9 +23,9 @@ import com.testing.slotrooms.model.database.entities.Users
 import com.testing.slotrooms.presentation.views.buttons.TextButtonDismiss
 
 @Composable
-fun ChoiceRoomDialog(
-    viewModel: AddNewSlotViewModel,
-    onConfirmClicked: (responseData: String) -> Unit,
+fun <T> ChoiceRoomDialog(
+    viewModel: AddNewSlotViewModelImpl,
+    onConfirmClicked: (responseData: T) -> Unit,
     onDismiss: () -> Unit,
     dialogType: DialogType
 ) {
@@ -64,11 +64,11 @@ fun ChoiceRoomDialog(
                             is Rooms -> {
                                 SlotContentView(
                                     needDivider = index < dataList.value.lastIndex,
-                                    room = data.name,
+                                    name = data.name,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            onConfirmClicked.invoke(data.name)
+                                            onConfirmClicked.invoke(data as T)
                                             dialogState.value = false
                                         }
                                 )
@@ -76,11 +76,11 @@ fun ChoiceRoomDialog(
                             is Users -> {
                                 SlotContentView(
                                     needDivider = index < dataList.value.lastIndex,
-                                    room = data.name,
+                                    name = data.name,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            onConfirmClicked.invoke(data.name)
+                                            onConfirmClicked.invoke(data as T)
                                             dialogState.value = false
                                         }
                                 )
@@ -113,10 +113,10 @@ fun ChoiceRoomDialog(
 }
 
 @Composable
-fun SlotContentView(needDivider: Boolean, room: String, modifier: Modifier) {
+fun SlotContentView(needDivider: Boolean, name: String, modifier: Modifier) {
     Box(modifier = modifier) {
         Text(
-            text = room,
+            text = name,
             style = MaterialTheme.typography.body2,
         )
     }
@@ -156,7 +156,7 @@ fun ChoiceRoomDialog2(
                     itemsIndexed(dataForDialog) { index, data ->
                         SlotContentView(
                             needDivider = index < dataForDialog.lastIndex,
-                            room = data,
+                            name = data,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
@@ -192,8 +192,8 @@ fun ChoiceRoomDialog2(
 @Preview
 @Composable
 fun ChoiceRoomDialog_Preview() {
-    ChoiceRoomDialog(
-        viewModel = viewModel<AddNewSlotViewModelImplPreview>(),
+    ChoiceRoomDialog<Rooms>(
+        viewModel = viewModel<AddNewSlotViewModelImpl>(),
         onConfirmClicked = { },
         onDismiss = {},
         dialogType = DialogType.ROOM

@@ -21,8 +21,10 @@ import com.testing.slotrooms.presentation.slots.SlotsScreen
 import com.testing.slotrooms.presentation.slots.SlotsViewModel
 import com.testing.slotrooms.ui.theme.MainBackground
 import com.testing.slotrooms.ui.theme.SlotRoomsTheme
+import dagger.hilt.android.AndroidEntryPoint
 
 //class MainActivity : ComponentActivity() {
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -11,17 +11,17 @@ import com.testing.slotrooms.model.database.entities.Users
 interface SlotsDao {
 
     @Insert
-    fun insertUser(users: Users)
+    suspend fun insertUser(users: Users)
 
     @Insert
-    fun insertRoom(room: Rooms)
+    suspend fun insertRoom(room: Rooms)
 
     @Insert
-    fun insertSlot(slot: Slots)
+    suspend fun insertSlot(slot: Slots)
 
     @Query("SELECT * FROM rooms")
-    fun getAllRooms() : List<Rooms>
+    suspend fun getAllRooms() : List<Rooms>
 
     @Query("SELECT * FROM users")
-    fun getAllUsers() : List<Users>
+    suspend fun getAllUsers() : List<Users>
 }

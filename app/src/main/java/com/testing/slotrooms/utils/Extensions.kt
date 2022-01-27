@@ -1,5 +1,7 @@
 package com.testing.slotrooms.utils
 
+import com.testing.slotrooms.model.database.entities.Slots
+import com.testing.slotrooms.presentation.addnewslot.SlotRoom
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -16,5 +18,16 @@ fun Long?.dateFormat(template: String = "dd MMM yyyy"): String {
 
 fun Long.timeFormat(template: String = "HH : mm") : String {
     return SimpleDateFormat(template, Locale.getDefault()).format(Date(this))
+}
+
+fun SlotRoom.toSlotsEntity() : Slots {
+    return Slots(
+        id = this.id.toString(),
+        start = this.beginDateTime,
+        end = this.endDateTime,
+        roomId = this.room.id,
+        ownerId = this.owner.id,
+        comment = this.comments
+    )
 }
 

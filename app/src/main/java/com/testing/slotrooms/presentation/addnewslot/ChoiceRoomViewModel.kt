@@ -23,9 +23,9 @@ class ChoiceRoomViewModel: ViewModel() {
 
     val defaultRooms = listOf("Office", "Cabinet", "Java room", "Angular room", "Office", "Cabinet", "Java room")
     val defaultOwners = listOf("Ivan Popov", "Pavel Ivanov", "Alexandr Petrov", "Petr Alexandrov", "Anna Ishman", "Igor Lapshov", "Alexey Borovikov")
-    var db: SlotsDatabase = SlotsDatabase.getDatabase(SlotsApplication.appContext)
+//    var db: SlotsDatabase = SlotsDatabase.getDatabase(SlotsApplication.appContext)
 
-    init {
+/*    init {
         viewModelScope.launch(Dispatchers.IO) {
             val roomsDb = db.slotsDao().getAllRooms()
             if (roomsDb.size < 2) {
@@ -60,5 +60,5 @@ class ChoiceRoomViewModel: ViewModel() {
             val room = Rooms(id = index + 10, name = value)
             db.slotsDao().insertRoom(room)
         }
-    }
+    }*/
 }

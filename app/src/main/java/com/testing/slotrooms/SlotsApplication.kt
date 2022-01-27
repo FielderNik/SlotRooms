@@ -2,8 +2,9 @@ package com.testing.slotrooms
 
 import android.app.Application
 import android.content.Context
+import dagger.hilt.android.HiltAndroidApp
 
-
+@HiltAndroidApp
 class SlotsApplication: Application() {
 
 //    lateinit var appComponent: AppComponent

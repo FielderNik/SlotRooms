@@ -10,13 +10,14 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.testing.slotrooms.model.database.entities.Rooms
 import com.testing.slotrooms.model.database.entities.Slots
 import com.testing.slotrooms.model.database.entities.Users
+import java.util.*
 
-@Database(entities = [Users::class, Rooms::class, Slots::class], version = 1)
+@Database(entities = [Users::class, Rooms::class, Slots::class], version = 2)
 abstract class SlotsDatabase : RoomDatabase() {
     abstract fun slotsDao(): SlotsDao
 
 
-    companion object {
+    /*companion object {
         @Volatile
         private var INSTANCE: SlotsDatabase? = null
 
@@ -30,34 +31,34 @@ abstract class SlotsDatabase : RoomDatabase() {
                 .fallbackToDestructiveMigration()
                 .build()
 
-        private val roomCallback = object : Callback() {
-            override fun onCreate(db: SupportSQLiteDatabase) {
-                super.onCreate(db)
-                insertDefaultData(INSTANCE!!)
-            }
-        }
+//        private val roomCallback = object : Callback() {
+//            override fun onCreate(db: SupportSQLiteDatabase) {
+//                super.onCreate(db)
+//                insertDefaultData(INSTANCE!!)
+//            }
+//        }
 
-        private fun insertDefaultData(db: SlotsDatabase) {
-            val slotDao = db.slotsDao()
-            slotDao.insertUser(
-                Users(id = 99, name = "Alex")
-            )
-            slotDao.insertRoom(
-                Rooms(id = 99, name = "Room Office")
-            )
-
-            slotDao.insertSlot(
-                Slots(
-                    id = 1,
-                    start = 2,
-                    end = 3,
-                    roomId = 1,
-                    ownerId = 1,
-                    comment = "Test comment for Room Office"
-                )
-            )
-        }
-    }
+//        private fun insertDefaultData(db: SlotsDatabase) {
+//            val slotDao = db.slotsDao()
+//            slotDao.insertUser(
+//                Users(id = 99, name = "Alex")
+//            )
+//            slotDao.insertRoom(
+//                Rooms(id = 99, name = "Room Office")
+//            )
+//
+//            slotDao.insertSlot(
+//                Slots(
+//                    id = UUID.randomUUID().toString(),
+//                    start = 2,
+//                    end = 3,
+//                    roomId = 1,
+//                    ownerId = 1,
+//                    comment = "Test comment for Room Office"
+//                )
+//            )
+//        }
+    }*/
 
 
 //    companion object {

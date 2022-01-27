@@ -18,11 +18,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.testing.slotrooms.R
+import com.testing.slotrooms.model.database.entities.Rooms
+import com.testing.slotrooms.model.database.entities.Users
 import com.testing.slotrooms.presentation.views.buttons.ButtonCancel
 import com.testing.slotrooms.presentation.views.buttons.ButtonSave
 import com.testing.slotrooms.presentation.views.snackbars.ErrorSnackbar
@@ -48,7 +51,7 @@ fun AddNewSlotScreen(
 
         Column(modifier = Modifier.fillMaxSize()) {
             ToolbarAddNewSlot(isNewSlot)
-            RoomEditBlock(scaffoldState = scaffoldState)
+            RoomEditBlock(viewModel = hiltViewModel<AddNewSlotViewModelImpl>(),scaffoldState = scaffoldState)
 
             ErrorSnackbar(
                 snackbarHostState = scaffoldState.snackbarHostState,
@@ -84,7 +87,7 @@ fun ToolbarAddNewSlot(
 
 @Composable
 fun RoomEditBlock(
-    viewModel: AddNewSlotViewModel = viewModel<AddNewSlotViewModelImpl>(),
+    viewModel: AddNewSlotViewModelImpl,
     scaffoldState: ScaffoldState
 ) {
     val activity = LocalContext.current as AppCompatActivity
@@ -153,7 +156,7 @@ fun RoomEditBlock(
     }
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        SlotContentView(title = stringResource(id = R.string.title_room), content = slotRoom.value.roomName, onClick = {
+        SlotContentView(title = stringResource(id = R.string.title_room), content = slotRoom.value.room.name, onClick = {
             viewModel.handleEvent(AddNewSlotEvent.OnDialogClicked(DialogType.ROOM))
         })
         SlotDateView(
@@ -174,7 +177,7 @@ fun RoomEditBlock(
             onTimeClick = {
                 viewModel.handleEvent(AddNewSlotEvent.TimePickerClicked(isBegin = false))
             })
-        SlotContentView(title = stringResource(id = R.string.title_owner), content = slotRoom.value.owner, onClick = {
+        SlotContentView(title = stringResource(id = R.string.title_owner), content = slotRoom.value.owner.name, onClick = {
             viewModel.handleEvent(AddNewSlotEvent.OnDialogClicked(DialogType.OWNER))
         })
         SlotContentView(title = stringResource(id = R.string.title_comment), content = slotRoom.value.comments, onClick = {
@@ -187,7 +190,6 @@ fun RoomEditBlock(
                 viewModel.handleEvent(AddNewSlotEvent.SaveSlotEvent)
             },
             onCancelClicked = {
-
                 viewModel.handleEvent(AddNewSlotEvent.CancelSlotEvent)
             }
         )
@@ -202,10 +204,10 @@ fun RoomEditBlock(
 @Composable
 fun ChoiceDialogView(
     dialogType: DialogType,
-    viewModel: AddNewSlotViewModel
+    viewModel: AddNewSlotViewModelImpl
 ) {
     if (dialogType == DialogType.ROOM) {
-        ChoiceRoomDialog(
+        ChoiceRoomDialog<Rooms>(
             viewModel = viewModel,
             onConfirmClicked = {
                 viewModel.handleEvent(AddNewSlotEvent.SelectedRoomEvent(it))
@@ -216,7 +218,7 @@ fun ChoiceDialogView(
             dialogType = dialogType
         )
     } else {
-        ChoiceRoomDialog(
+        ChoiceRoomDialog<Users>(
             viewModel = viewModel,
             onConfirmClicked = {
                 viewModel.handleEvent(AddNewSlotEvent.SelectedOwnerEvent(it))
@@ -271,7 +273,7 @@ fun SlotContentView(title: String, content: String, onClick: () -> Unit) {
             .clickable {
                 onClick.invoke()
             }
-            .padding(top = 16.dp, bottom = 8.dp)
+            .padding(top = 12.dp, bottom = 8.dp)
     )
     Divider()
 }
@@ -297,7 +299,7 @@ fun SlotDateView(
                 .clickable {
                     onDateClick.invoke()
                 }
-                .padding(top = 16.dp, bottom = 8.dp, end = 16.dp)
+                .padding(top = 12.dp, bottom = 8.dp, end = 16.dp)
         )
 
         Text(text = dateTimeMillis.timeFormat(),
@@ -306,7 +308,7 @@ fun SlotDateView(
                 .clickable {
                     onTimeClick.invoke()
                 }
-                .padding(top = 16.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
+                .padding(top = 12.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
         )
     }
     Divider()

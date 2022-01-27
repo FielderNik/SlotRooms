@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 class SlotsViewModel() : ViewModel() {
-    var db: SlotsDatabase = SlotsDatabase.getDatabase(SlotsApplication.appContext)
+//    var db: SlotsDatabase = SlotsDatabase.getDatabase(SlotsApplication.appContext)
 
     init {
 
@@ -21,7 +21,7 @@ class SlotsViewModel() : ViewModel() {
     fun addUser() {
         viewModelScope.launch (Dispatchers.IO) {
             val newUser = Users(id = 2, name = "Anna")
-            db.slotsDao().insertUser(newUser)
+//            db.slotsDao().insertUser(newUser)
         }
     }
 

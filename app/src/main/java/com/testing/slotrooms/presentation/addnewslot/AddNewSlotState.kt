@@ -1,5 +1,7 @@
 package com.testing.slotrooms.presentation.addnewslot
 
+import com.testing.slotrooms.model.database.entities.Rooms
+import com.testing.slotrooms.model.database.entities.Users
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -27,8 +29,8 @@ sealed class AddNewSlotEvent {
     object EndTimeClicked: AddNewSlotEvent(), UI
     object OwnerClicked: AddNewSlotEvent(), UI
     object CommentClicked: AddNewSlotEvent(), UI
-    data class SelectedRoomEvent(val room: String): AddNewSlotEvent(), UI
-    data class SelectedOwnerEvent(val owner: String): AddNewSlotEvent(), UI
+    data class SelectedRoomEvent(val room: Rooms): AddNewSlotEvent(), UI
+    data class SelectedOwnerEvent(val owner: Users): AddNewSlotEvent(), UI
     object EnterScreen: AddNewSlotEvent(), UI
     data class SelectedBeginDateEvent(val beginDateMillis: Long): AddNewSlotEvent(), UI
     data class SelectedBeginTimeEvent(val beginTimeHour: Int, val beginTimeMinutes: Int): AddNewSlotEvent(), UI
@@ -50,8 +52,9 @@ sealed class AddNewSlotEffect {
 }
 
 data class SlotRoom(
-    val roomName: String = "Choice room",
-    val owner: String = "",
+    val id: UUID = UUID.randomUUID(),
+    val room: Rooms = Rooms(0, ""),
+    val owner: Users = Users(0, ""),
     val comments: String = "",
     val beginDateTime: Long = 0L,
     val endDateTime: Long = 0L,
