@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.testing.slotrooms.presentation.MainScreen
 import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.addnewslot.AddNewSlotScreen
 import com.testing.slotrooms.presentation.slots.SlotsScreen
@@ -31,17 +32,16 @@ class MainActivity : AppCompatActivity() {
         setContent {
 
             SlotRoomsTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(color = MainBackground) {
-                    val slotsViewModel = viewModel<SlotsViewModel>()
-                    val navController = rememberNavController()
+                    MainScreen()
+//                    SlotsScreen()
 
-                    NavHost(
+                /*    NavHost(
                         navController = navController,
                         startDestination = Screens.SlotsScreen.route)
                     {
                         composable(Screens.SlotsScreen.route) {
-                            SlotsScreen(viewModel = slotsViewModel, navController)
+                            SlotsScreen(navController = navController)
                         }
                         composable(
                             route = Screens.AddNewSlotScreen.route,
@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
                             val isNewSlot = it.arguments?.getBoolean("isNewSlot", true) ?: true
                             AddNewSlotScreen(isNewSlot = isNewSlot)
                         }
-                    }
+                    }*/
                 }
             }
         }

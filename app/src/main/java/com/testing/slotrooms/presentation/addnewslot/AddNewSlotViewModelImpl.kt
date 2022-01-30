@@ -3,14 +3,14 @@ package com.testing.slotrooms.presentation.addnewslot
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.testing.slotrooms.SlotsApplication
 import com.testing.slotrooms.core.EventHandler
+import com.testing.slotrooms.core.onSuccess
 import com.testing.slotrooms.domain.repositoties.DatabaseRepository
-import com.testing.slotrooms.model.database.SlotsDatabase
+import com.testing.slotrooms.domain.usecases.AddDefaultRoomsUseCase
+import com.testing.slotrooms.domain.usecases.AddDefaultUsersUseCase
 import com.testing.slotrooms.model.database.entities.Rooms
 import com.testing.slotrooms.model.database.entities.Users
 import com.testing.slotrooms.utils.atStartOfDay
-import com.testing.slotrooms.utils.dateFormat
 import com.testing.slotrooms.utils.toSlotsEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +21,7 @@ import java.util.*
 import javax.inject.Inject
 
 
-abstract class AddNewSlotViewModel: ViewModel(), EventHandler<AddNewSlotEvent> {
+abstract class AddNewSlotViewModel : ViewModel(), EventHandler<AddNewSlotEvent> {
     abstract val addNewSlotState: StateFlow<AddNewSlotState>
     abstract val slotRoom: StateFlow<SlotRoom>
     abstract val effect: StateFlow<Effects?>
@@ -31,17 +31,18 @@ abstract class AddNewSlotViewModel: ViewModel(), EventHandler<AddNewSlotEvent> {
     override fun handleEvent(event: AddNewSlotEvent) {}
     open suspend fun resetErrorStatus() {}
 }
+
 @HiltViewModel
-class AddNewSlotViewModelImpl @Inject constructor(private val databaseRepository: DatabaseRepository): ViewModel(), EventHandler<AddNewSlotEvent> {
-    private val _rooms: MutableStateFlow<List<Rooms>> = MutableStateFlow(listOf(Rooms(1, "Office")))
+class AddNewSlotViewModelImpl @Inject constructor(
+    private val databaseRepository: DatabaseRepository,
+    private val addDefaultRoomsUseCase: AddDefaultRoomsUseCase,
+    private val addDefaultUsersUseCase: AddDefaultUsersUseCase,
+) : ViewModel(), EventHandler<AddNewSlotEvent> {
+    private val _rooms: MutableStateFlow<List<Rooms>> = MutableStateFlow(listOf(Rooms(UUID.randomUUID().toString(), "Office")))
     val rooms: StateFlow<List<Rooms>> = _rooms
 
-    private val _owners: MutableStateFlow<List<Users>> = MutableStateFlow(listOf(Users(1, "Ivanov Ivan")))
+    private val _owners: MutableStateFlow<List<Users>> = MutableStateFlow(listOf(Users(UUID.randomUUID().toString(), "Ivanov Ivan")))
     val owners: StateFlow<List<Users>> = _owners
-
-    private val defaultRooms = listOf("Office", "Cabinet", "Java room", "Angular room", "Office", "Cabinet", "Java room")
-    private val defaultOwners = listOf("Ivan Popov", "Pavel Ivanov", "Alexandr Petrov", "Petr Alexandrov", "Anna Ishman", "Igor Lapshov", "Alexey Borovikov")
-//    var db: SlotsDatabase = SlotsDatabase.getDatabase(SlotsApplication.appContext)
 
     private val currentDate = SlotRoom.getCurrentDate()
     private val _addNewSlotState: MutableStateFlow<AddNewSlotState> = MutableStateFlow(AddNewSlotState.EmptyState)
@@ -55,23 +56,17 @@ class AddNewSlotViewModelImpl @Inject constructor(private val databaseRepository
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-//            val roomsDb = db.slotsDao().getAllRooms()
-            val roomsDb = databaseRepository.getAllRooms()
-            if (roomsDb.size < 2) {
-                addDefaultRooms()
+            addDefaultRoomsUseCase.run().onSuccess { updatedRooms ->
+                launch {
+                    _rooms.emit(updatedRooms)
+                }
             }
-//            val updatedRooms = db.slotsDao().getAllRooms()
-            val updatedRooms = databaseRepository.getAllRooms()
-            _rooms.emit(updatedRooms)
 
-//            val usersDb = db.slotsDao().getAllUsers()
-            val usersDb = databaseRepository.getAllUsers()
-            if (usersDb.size < 2) {
-                addDefaultUsers()
+            addDefaultUsersUseCase.run().onSuccess { updatedOwners ->
+                launch {
+                    _owners.emit(updatedOwners)
+                }
             }
-//            val updatedUsers = db.slotsDao().getAllUsers()
-            val updatedUsers = databaseRepository.getAllUsers()
-            _owners.emit(updatedUsers)
         }
     }
 
@@ -313,31 +308,13 @@ class AddNewSlotViewModelImpl @Inject constructor(private val databaseRepository
         }
     }
 
-    private suspend fun addDefaultUsers() {
-        defaultOwners.forEachIndexed { index, value ->
-            val user = Users(id = index + 10, name = value)
-//            db.slotsDao().insertUser(user)
-            databaseRepository.insertUser(user)
-        }
-
-    }
-
-    private suspend fun addDefaultRooms() {
-        defaultRooms.forEachIndexed { index, value ->
-            val room = Rooms(id = index + 10, name = value)
-//            db.slotsDao().insertRoom(room)
-            databaseRepository.insertRoom(room)
-        }
-    }
-
-    private fun getUpdatedTime(hour: Int, minutes: Int, dateTime: Long) : Long {
+    private fun getUpdatedTime(hour: Int, minutes: Int, dateTime: Long): Long {
         val hourByMillis = hour * 3600000L
         val minutesByMillis = minutes * 60000L
         val currentStartDay = atStartOfDay(Date(dateTime))?.time ?: 0L
         return currentStartDay + hourByMillis + minutesByMillis
     }
 }
-
 
 
 class AddNewSlotViewModelImplPreview() : AddNewSlotViewModel() {

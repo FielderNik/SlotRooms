@@ -12,13 +12,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
+import java.util.*
 
 class ChoiceRoomViewModel: ViewModel() {
 
-    private val _rooms: MutableStateFlow<List<Rooms>> = MutableStateFlow(listOf(Rooms(1, "Office")))
+    private val _rooms: MutableStateFlow<List<Rooms>> = MutableStateFlow(listOf(Rooms(UUID.randomUUID().toString(), "Office")))
     val rooms: StateFlow<List<Rooms>> = _rooms
 
-    private val _owners: MutableStateFlow<List<Users>> = MutableStateFlow(listOf(Users(1, "Ivanov Ivan")))
+    private val _owners: MutableStateFlow<List<Users>> = MutableStateFlow(listOf(Users(UUID.randomUUID().toString(), "Ivanov Ivan")))
     val owners: StateFlow<List<Users>> = _owners
 
     val defaultRooms = listOf("Office", "Cabinet", "Java room", "Angular room", "Office", "Cabinet", "Java room")

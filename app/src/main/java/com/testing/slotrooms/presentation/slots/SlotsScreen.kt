@@ -18,10 +18,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.testing.slotrooms.R
 import com.testing.slotrooms.domain.slots.SlotsModel
+import com.testing.slotrooms.presentation.NavigationGraph
 import com.testing.slotrooms.presentation.Screens
+import com.testing.slotrooms.presentation.bottomnavbar.BottomNavigationBar
 import com.testing.slotrooms.ui.theme.GreenMain
 import com.testing.slotrooms.ui.theme.MainFont
 import com.testing.slotrooms.ui.theme.YellowMain
@@ -30,12 +35,12 @@ import java.util.*
 
 @Composable
 fun SlotsScreen(
-    viewModel: SlotsViewModel,
-    navController: NavController
+    viewModel: SlotsViewModel = hiltViewModel<SlotsViewModel>(),
+    navController: NavHostController
 ) {
     val slots = viewModel.slots
     Scaffold(
-        floatingActionButton = {
+/*        floatingActionButton = {
             FloatingActionButton(
                 onClick = {
                     navController.navigate(Screens.AddNewSlotScreen.passIsNewSlot(true))
@@ -49,7 +54,7 @@ fun SlotsScreen(
                 )
             }
         },
-        floatingActionButtonPosition = FabPosition.Center
+        floatingActionButtonPosition = FabPosition.Center*/
     ) {
         Column {
             ToolbarSlots()

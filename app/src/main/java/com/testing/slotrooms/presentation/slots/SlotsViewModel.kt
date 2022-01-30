@@ -6,11 +6,14 @@ import com.testing.slotrooms.SlotsApplication
 import com.testing.slotrooms.domain.slots.*
 import com.testing.slotrooms.model.database.SlotsDatabase
 import com.testing.slotrooms.model.database.entities.Users
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
+import javax.inject.Inject
 
-class SlotsViewModel() : ViewModel() {
+@HiltViewModel
+class SlotsViewModel @Inject constructor() : ViewModel() {
 //    var db: SlotsDatabase = SlotsDatabase.getDatabase(SlotsApplication.appContext)
 
     init {
@@ -20,7 +23,7 @@ class SlotsViewModel() : ViewModel() {
 
     fun addUser() {
         viewModelScope.launch (Dispatchers.IO) {
-            val newUser = Users(id = 2, name = "Anna")
+            val newUser = Users(id = UUID.randomUUID().toString(), name = "Anna")
 //            db.slotsDao().insertUser(newUser)
         }
     }

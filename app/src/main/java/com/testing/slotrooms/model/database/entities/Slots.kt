@@ -10,7 +10,7 @@ data class Slots(
     val id: String,
     val start: Long,
     val end: Long,
-    val roomId: Int,
-    val ownerId: Int,
+    val roomId: String,
+    val ownerId: String,
     val comment: String
 )

@@ -53,8 +53,8 @@ sealed class AddNewSlotEffect {
 
 data class SlotRoom(
     val id: UUID = UUID.randomUUID(),
-    val room: Rooms = Rooms(0, ""),
-    val owner: Users = Users(0, ""),
+    val room: Rooms = Rooms("", ""),
+    val owner: Users = Users("", ""),
     val comments: String = "",
     val beginDateTime: Long = 0L,
     val endDateTime: Long = 0L,
