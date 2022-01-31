@@ -24,4 +24,7 @@ interface SlotsDao {
 
     @Query("SELECT * FROM users")
     suspend fun getAllUsers() : List<Users>
+
+    @Query("SELECT * FROM slots WHERE roomId =:roomId AND ((start BETWEEN :beginTime AND :endTime) OR ('end' BETWEEN :beginTime AND :endTime))")
+    suspend fun getSlotsByRoomIdAndTime(roomId: String, beginTime: Long, endTime: Long) : List<Slots>
 }

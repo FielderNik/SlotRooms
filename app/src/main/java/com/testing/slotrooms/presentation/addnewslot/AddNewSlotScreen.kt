@@ -98,6 +98,11 @@ fun RoomEditBlock(
     val resources = LocalContext.current.resources
 
     when (val state = viewState.value) {
+        is AddNewSlotState.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
         is AddNewSlotState.OpenSlotDialog -> {
             ChoiceDialogView(dialogType = state.dialogType, viewModel = viewModel)
         }
@@ -383,6 +388,21 @@ private fun handleEffect(
             AddNewSlotEvent.RoomEmptyError -> {
                 coroutineScope.launch {
                     scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_slot_room_is_empty))
+                }
+            }
+            is AddNewSlotEvent.GetRoomsError -> {
+                coroutineScope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_get_rooms))
+                }
+            }
+            is AddNewSlotEvent.GetUsersError -> {
+                coroutineScope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_get_users))
+                }
+            }
+            is AddNewSlotEvent.SaveSlotError -> {
+                coroutineScope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_slot_is_busy))
                 }
             }
         }

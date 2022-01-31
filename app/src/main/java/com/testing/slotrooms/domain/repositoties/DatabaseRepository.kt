@@ -1,5 +1,6 @@
 package com.testing.slotrooms.domain.repositoties
 
+import android.util.Log
 import com.testing.slotrooms.model.database.SlotsDao
 import com.testing.slotrooms.model.database.entities.Rooms
 import com.testing.slotrooms.model.database.entities.Slots
@@ -12,6 +13,7 @@ interface DatabaseRepository {
     suspend fun insertSlot(slot: Slots)
     suspend fun getAllUsers() : List<Users>
     suspend fun getAllRooms() : List<Rooms>
+    suspend fun getSlotsByRoomIdAndTime(slot: Slots) : List<Slots>
 
 }
 
@@ -35,5 +37,12 @@ class DatabaseRepositoryImpl @Inject constructor(private val slotsDao: SlotsDao)
     override suspend fun getAllRooms(): List<Rooms> {
         return slotsDao.getAllRooms()
     }
+
+    override suspend fun getSlotsByRoomIdAndTime(slot: Slots): List<Slots> {
+        val query = "SELECT * FROM slots WHERE roomId =:${slot.roomId} AND ((start BETWEEN ${slot.start} AND ${slot.end}) OR ('end' BETWEEN ${slot.start} AND ${slot.end}))"
+        Log.d("milk", "query: $query")
+        return slotsDao.getSlotsByRoomIdAndTime(slot.roomId, slot.start, slot.end)
+    }
+
 
 }

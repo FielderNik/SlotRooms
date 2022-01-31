@@ -1,8 +1,7 @@
 package com.testing.slotrooms.di
 
 import com.testing.slotrooms.domain.repositoties.DatabaseRepository
-import com.testing.slotrooms.domain.usecases.AddDefaultRoomsUseCase
-import com.testing.slotrooms.domain.usecases.AddDefaultUsersUseCase
+import com.testing.slotrooms.domain.usecases.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,5 +19,20 @@ object UseCaseModule {
     @Provides
     fun provideAddDefaultUsersUseCase(databaseRepository: DatabaseRepository) : AddDefaultUsersUseCase {
         return AddDefaultUsersUseCase(databaseRepository = databaseRepository)
+    }
+
+    @Provides
+    fun provideGetAllRoomsUseCase(databaseRepository: DatabaseRepository) : GetAllRoomsUseCase {
+        return GetAllRoomsUseCase(databaseRepository = databaseRepository)
+    }
+
+    @Provides
+    fun provideGetAllUsersUseCase(databaseRepository: DatabaseRepository) : GetAllUsersUseCase {
+        return GetAllUsersUseCase(databaseRepository = databaseRepository)
+    }
+
+    @Provides
+    fun provideSaveNewSlotUseCase(databaseRepository: DatabaseRepository) : SaveNewSlotUseCase {
+        return SaveNewSlotUseCase(databaseRepository = databaseRepository)
     }
 }

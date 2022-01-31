@@ -4,19 +4,21 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.testing.slotrooms.core.EventHandler
+import com.testing.slotrooms.core.onFailure
 import com.testing.slotrooms.core.onSuccess
 import com.testing.slotrooms.domain.repositoties.DatabaseRepository
-import com.testing.slotrooms.domain.usecases.AddDefaultRoomsUseCase
-import com.testing.slotrooms.domain.usecases.AddDefaultUsersUseCase
+import com.testing.slotrooms.domain.usecases.*
 import com.testing.slotrooms.model.database.entities.Rooms
 import com.testing.slotrooms.model.database.entities.Users
 import com.testing.slotrooms.utils.atStartOfDay
 import com.testing.slotrooms.utils.toSlotsEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
@@ -37,6 +39,9 @@ class AddNewSlotViewModelImpl @Inject constructor(
     private val databaseRepository: DatabaseRepository,
     private val addDefaultRoomsUseCase: AddDefaultRoomsUseCase,
     private val addDefaultUsersUseCase: AddDefaultUsersUseCase,
+    private val getAllRoomsUseCase: GetAllRoomsUseCase,
+    private val getAllUsersUseCase: GetAllUsersUseCase,
+    private val saveNewSlotUseCase: SaveNewSlotUseCase
 ) : ViewModel(), EventHandler<AddNewSlotEvent> {
     private val _rooms: MutableStateFlow<List<Rooms>> = MutableStateFlow(listOf(Rooms(UUID.randomUUID().toString(), "Office")))
     val rooms: StateFlow<List<Rooms>> = _rooms
@@ -54,7 +59,7 @@ class AddNewSlotViewModelImpl @Inject constructor(
     private val _effect: MutableStateFlow<Effects?> = MutableStateFlow(null)
     val effect: StateFlow<Effects?> = _effect
 
-    init {
+    /*init {
         viewModelScope.launch(Dispatchers.IO) {
             addDefaultRoomsUseCase.run().onSuccess { updatedRooms ->
                 launch {
@@ -68,7 +73,7 @@ class AddNewSlotViewModelImpl @Inject constructor(
                 }
             }
         }
-    }
+    }*/
 
     override fun handleEvent(event: AddNewSlotEvent) {
         when (val currentState = _addNewSlotState.value) {
@@ -78,8 +83,35 @@ class AddNewSlotViewModelImpl @Inject constructor(
             is AddNewSlotState.OpenDatePicker -> reduce(event, currentState)
             is AddNewSlotState.OpenTimePicker -> reduce(event, currentState)
             is AddNewSlotState.OpenCommentDialog -> reduce(event, currentState)
+            is AddNewSlotState.Loading -> reduce(event, currentState)
         }
 
+    }
+
+    private fun reduce(event: AddNewSlotEvent, currentState: AddNewSlotState.Loading) {
+        when (event) {
+            is AddNewSlotEvent.SelectedRoomEvent -> {
+                fetchDisplayState(event.room)
+            }
+            is AddNewSlotEvent.OnDialogClicked -> {
+                openDialog(event.dialogType)
+            }
+            is AddNewSlotEvent.DatePickerClicked -> {
+                openDatePicker(event.isBegin)
+            }
+            is AddNewSlotEvent.TimePickerClicked -> {
+                openTimePicker(event.isBegin)
+            }
+            is AddNewSlotEvent.CommentClicked -> {
+                openCommentDialog()
+            }
+            is AddNewSlotEvent.SaveSlotEvent -> {
+                saveSlot()
+            }
+            is AddNewSlotEvent.CancelSlotEvent -> {
+
+            }
+        }
     }
 
     private fun reduce(event: AddNewSlotEvent, currentState: AddNewSlotState.OpenCommentDialog) {
@@ -234,10 +266,19 @@ class AddNewSlotViewModelImpl @Inject constructor(
     private fun saveSlot() {
         viewModelScope.launch(Dispatchers.IO) {
             if (checkSlot()) {
+                _slotRoom.value = _slotRoom.value.copy(id = UUID.randomUUID())
                 val slotEntity = _slotRoom.value.toSlotsEntity()
-//                db.slotsDao().insertSlot(slotEntity)
-                databaseRepository.insertSlot(slotEntity)
-                Log.d("milk", "OK slot: ${slotRoom.value}")
+
+                saveNewSlotUseCase.run(slotEntity)
+                    .onFailure {
+                        viewModelScope.launch {
+                            _effect.emit(AddNewSlotEvent.SaveSlotError(it))
+                        }
+                    }
+                    .onSuccess {
+                        Log.d("milk", "OK slot: ${slotRoom.value}")
+                    }
+
             } else {
                 Log.d("milk", "WRONG! slot: ${slotRoom.value}")
             }
@@ -304,8 +345,44 @@ class AddNewSlotViewModelImpl @Inject constructor(
 
     private fun openDialog(dialogType: DialogType) {
         viewModelScope.launch {
-            _addNewSlotState.emit(AddNewSlotState.OpenSlotDialog(dialogType = dialogType))
+            _addNewSlotState.emit(AddNewSlotState.Loading)
+            delay(2000)
+            when (dialogType) {
+                DialogType.ROOM -> {
+                    getAllRooms()
+                }
+                DialogType.OWNER -> {
+                    getAllUsers()
+                }
+            }
+
         }
+    }
+
+    private suspend fun getAllRooms() {
+        getAllRoomsUseCase.run()
+            .onSuccess {
+                viewModelScope.launch {
+                    _rooms.tryEmit(it)
+                    _addNewSlotState.emit(AddNewSlotState.OpenSlotDialog(dialogType = DialogType.ROOM))
+                }
+            }
+            .onFailure {
+                _effect.tryEmit(AddNewSlotEvent.GetRoomsError(it))
+            }
+    }
+
+    private suspend fun getAllUsers() {
+        getAllUsersUseCase.run()
+            .onSuccess {
+                viewModelScope.launch {
+                    _owners.tryEmit(it)
+                    _addNewSlotState.emit(AddNewSlotState.OpenSlotDialog(dialogType = DialogType.OWNER))
+                }
+            }
+            .onFailure {
+                _effect.tryEmit(AddNewSlotEvent.GetUsersError(it))
+            }
     }
 
     private fun getUpdatedTime(hour: Int, minutes: Int, dateTime: Long): Long {
