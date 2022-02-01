@@ -21,3 +21,9 @@ buildscript {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+task("checkAll") {
+    group "Verify"
+    description "Runs all static checks on the build"
+    dependsOn "pmd", "detekt"
+}
