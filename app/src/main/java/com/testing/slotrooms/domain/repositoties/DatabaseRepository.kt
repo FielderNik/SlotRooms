@@ -39,9 +39,9 @@ class DatabaseRepositoryImpl @Inject constructor(private val slotsDao: SlotsDao)
     }
 
     override suspend fun getSlotsByRoomIdAndTime(slot: Slots): List<Slots> {
-        val query = "SELECT * FROM slots WHERE roomId =:${slot.roomId} AND ((start BETWEEN ${slot.start} AND ${slot.end}) OR ('end' BETWEEN ${slot.start} AND ${slot.end}))"
-        Log.d("milk", "query: $query")
-        return slotsDao.getSlotsByRoomIdAndTime(slot.roomId, slot.start, slot.end)
+//        val query = "SELECT * FROM slots WHERE roomId =:${slot.roomId} AND ((start BETWEEN ${slot.start} AND ${slot.end}) OR ('end' BETWEEN ${slot.start} AND ${slot.end}))"
+//        Log.d("milk", "query: $query")
+        return slotsDao.getSlotsByRoomIdAndTime(slot.roomId, slot.startTime, slot.endTime)
     }
 
 

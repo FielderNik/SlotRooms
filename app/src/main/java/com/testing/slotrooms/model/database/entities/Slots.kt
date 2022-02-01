@@ -8,8 +8,8 @@ import java.util.*
 data class Slots(
     @PrimaryKey
     val id: String,
-    val start: Long,
-    val end: Long,
+    val startTime: Long,
+    val endTime: Long,
     val roomId: String,
     val ownerId: String,
     val comment: String

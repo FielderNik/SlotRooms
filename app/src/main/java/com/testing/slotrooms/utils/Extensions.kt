@@ -23,8 +23,8 @@ fun Long.timeFormat(template: String = "HH : mm") : String {
 fun SlotRoom.toSlotsEntity() : Slots {
     return Slots(
         id = this.id.toString(),
-        start = this.beginDateTime,
-        end = this.endDateTime,
+        startTime = this.beginDateTime,
+        endTime = this.endDateTime,
         roomId = this.room.id,
         ownerId = this.owner.id,
         comment = this.comments

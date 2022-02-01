@@ -36,7 +36,6 @@ abstract class AddNewSlotViewModel : ViewModel(), EventHandler<AddNewSlotEvent> 
 
 @HiltViewModel
 class AddNewSlotViewModelImpl @Inject constructor(
-    private val databaseRepository: DatabaseRepository,
     private val addDefaultRoomsUseCase: AddDefaultRoomsUseCase,
     private val addDefaultUsersUseCase: AddDefaultUsersUseCase,
     private val getAllRoomsUseCase: GetAllRoomsUseCase,
@@ -59,7 +58,7 @@ class AddNewSlotViewModelImpl @Inject constructor(
     private val _effect: MutableStateFlow<Effects?> = MutableStateFlow(null)
     val effect: StateFlow<Effects?> = _effect
 
-    /*init {
+    init {
         viewModelScope.launch(Dispatchers.IO) {
             addDefaultRoomsUseCase.run().onSuccess { updatedRooms ->
                 launch {
@@ -73,7 +72,7 @@ class AddNewSlotViewModelImpl @Inject constructor(
                 }
             }
         }
-    }*/
+    }
 
     override fun handleEvent(event: AddNewSlotEvent) {
         when (val currentState = _addNewSlotState.value) {
