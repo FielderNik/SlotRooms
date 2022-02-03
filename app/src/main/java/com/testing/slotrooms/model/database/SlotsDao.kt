@@ -3,8 +3,10 @@ package com.testing.slotrooms.model.database
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import com.testing.slotrooms.model.database.entities.Rooms
 import com.testing.slotrooms.model.database.entities.Slots
+import com.testing.slotrooms.model.database.entities.SlotsRoomsUsersEntity
 import com.testing.slotrooms.model.database.entities.Users
 
 @Dao
@@ -27,4 +29,8 @@ interface SlotsDao {
 
     @Query("SELECT * FROM (SELECT * FROM Slots WHERE (:beginTime BETWEEN startTime AND endTime) OR (:endTime BETWEEN startTime AND endTime)) WHERE :roomId = roomId")
     suspend fun getSlotsByRoomIdAndTime(roomId: String, beginTime: Long, endTime: Long) : List<Slots>
+
+    @Transaction
+    @Query("SELECT * FROM Slots")
+    fun getAllSlotsRoomsUsersEntities() : List<SlotsRoomsUsersEntity>
 }

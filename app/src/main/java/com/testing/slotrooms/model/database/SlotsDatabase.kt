@@ -1,18 +1,13 @@
 package com.testing.slotrooms.model.database
 
 
-
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.testing.slotrooms.model.database.entities.Rooms
 import com.testing.slotrooms.model.database.entities.Slots
 import com.testing.slotrooms.model.database.entities.Users
-import java.util.*
 
-@Database(entities = [Users::class, Rooms::class, Slots::class], version = 2)
+@Database(entities = [Users::class, Rooms::class, Slots::class], version = 3)
 abstract class SlotsDatabase : RoomDatabase() {
     abstract fun slotsDao(): SlotsDao
 

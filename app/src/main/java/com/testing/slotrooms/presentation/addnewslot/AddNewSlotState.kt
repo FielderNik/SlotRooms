@@ -2,11 +2,7 @@ package com.testing.slotrooms.presentation.addnewslot
 
 import com.testing.slotrooms.model.database.entities.Rooms
 import com.testing.slotrooms.model.database.entities.Users
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.util.*
+import com.testing.slotrooms.presentation.model.SlotRoom
 
 sealed class AddNewSlotState {
     object Loading : AddNewSlotState()
@@ -55,21 +51,6 @@ sealed class AddNewSlotEffect {
     class ShowError(val exception: Exception): AddNewSlotEffect()
 }
 
-data class SlotRoom(
-    val id: UUID = UUID.randomUUID(),
-    val room: Rooms = Rooms("", ""),
-    val owner: Users = Users("", ""),
-    val comments: String = "",
-    val beginDateTime: Long = 0L,
-    val endDateTime: Long = 0L,
-    ) {
-
-    companion object {
-        fun getCurrentDate() : Long {
-            return LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toEpochSecond() * 1000L
-        }
-    }
-}
 
 data class SlotDialog(
     val dialogType: DialogType = DialogType.ROOM,

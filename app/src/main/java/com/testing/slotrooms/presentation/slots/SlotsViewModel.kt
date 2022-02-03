@@ -2,30 +2,63 @@ package com.testing.slotrooms.presentation.slots
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.testing.slotrooms.SlotsApplication
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.testing.slotrooms.core.EventHandler
+import com.testing.slotrooms.core.None
+import com.testing.slotrooms.core.onFailure
+import com.testing.slotrooms.core.onSuccess
 import com.testing.slotrooms.domain.slots.*
-import com.testing.slotrooms.model.database.SlotsDatabase
+import com.testing.slotrooms.domain.usecases.GetAllSlotsUseCase
 import com.testing.slotrooms.model.database.entities.Users
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class SlotsViewModel @Inject constructor() : ViewModel() {
-//    var db: SlotsDatabase = SlotsDatabase.getDatabase(SlotsApplication.appContext)
+class SlotsViewModel @Inject constructor(
+    private val getAllSlotsUseCase: GetAllSlotsUseCase,
+) : ViewModel(), EventHandler<SlotsScreenEvent> {
 
-    init {
+    private val _slotsScreenState: MutableStateFlow<SlotsScreenState> = MutableStateFlow(SlotsScreenState.SlotsEmptyScreen)
+    val slotsScreenState: StateFlow<SlotsScreenState> = _slotsScreenState
 
+    override fun handleEvent(event: SlotsScreenEvent) {
+        when (val currentState = _slotsScreenState.value) {
+            is SlotsScreenState.SlotsEmptyScreen -> reduce(currentState, event)
+            is SlotsScreenState.SlotsLoading -> reduce(currentState, event)
+            is SlotsScreenState.SlotsSuccess -> reduce(currentState, event)
+        }
+    }
+
+
+    private fun reduce(currentState: SlotsScreenState.SlotsEmptyScreen, event: SlotsScreenEvent) {
+        viewModelScope.launch {
+            _slotsScreenState.emit(SlotsScreenState.SlotsLoading)
+            withContext(Dispatchers.IO) {
+                getAllSlotsUseCase.run(None)
+            }
+                .onFailure {
+
+                }
+                .onSuccess {
+                    viewModelScope.launch {
+                        _slotsScreenState.emit(SlotsScreenState.SlotsSuccess(it))
+                    }
+                }
+        }
+    }
+
+    private fun reduce(currentState: SlotsScreenState.SlotsLoading, event: SlotsScreenEvent) {
 
     }
 
-    fun addUser() {
-        viewModelScope.launch (Dispatchers.IO) {
-            val newUser = Users(id = UUID.randomUUID().toString(), name = "Anna")
-//            db.slotsDao().insertUser(newUser)
-        }
+    private fun reduce(currentState: SlotsScreenState.SlotsSuccess, event: SlotsScreenEvent) {
+
     }
 
 

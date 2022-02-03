@@ -1,5 +1,5 @@
 package com.testing.slotrooms.core
 
-interface UseCase<L, R> {
-    suspend fun run() : Either<L,R>
+interface UseCase<in Params, out Result> {
+    suspend fun run(params: Params) : Either<Exception,Result>
 }

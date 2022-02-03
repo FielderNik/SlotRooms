@@ -4,12 +4,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.testing.slotrooms.core.EventHandler
+import com.testing.slotrooms.core.None
 import com.testing.slotrooms.core.onFailure
 import com.testing.slotrooms.core.onSuccess
-import com.testing.slotrooms.domain.repositoties.DatabaseRepository
 import com.testing.slotrooms.domain.usecases.*
 import com.testing.slotrooms.model.database.entities.Rooms
 import com.testing.slotrooms.model.database.entities.Users
+import com.testing.slotrooms.presentation.model.SlotRoom
 import com.testing.slotrooms.utils.atStartOfDay
 import com.testing.slotrooms.utils.toSlotsEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
@@ -60,13 +60,13 @@ class AddNewSlotViewModelImpl @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            addDefaultRoomsUseCase.run().onSuccess { updatedRooms ->
+            addDefaultRoomsUseCase.run(None).onSuccess { updatedRooms ->
                 launch {
                     _rooms.emit(updatedRooms)
                 }
             }
 
-            addDefaultUsersUseCase.run().onSuccess { updatedOwners ->
+            addDefaultUsersUseCase.run(None).onSuccess { updatedOwners ->
                 launch {
                     _owners.emit(updatedOwners)
                 }
@@ -265,7 +265,7 @@ class AddNewSlotViewModelImpl @Inject constructor(
     private fun saveSlot() {
         viewModelScope.launch(Dispatchers.IO) {
             if (checkSlot()) {
-                _slotRoom.value = _slotRoom.value.copy(id = UUID.randomUUID())
+                _slotRoom.value = _slotRoom.value.copy(id = UUID.randomUUID().toString())
                 val slotEntity = _slotRoom.value.toSlotsEntity()
 
                 saveNewSlotUseCase.run(slotEntity)
@@ -359,7 +359,7 @@ class AddNewSlotViewModelImpl @Inject constructor(
     }
 
     private suspend fun getAllRooms() {
-        getAllRoomsUseCase.run()
+        getAllRoomsUseCase.run(None)
             .onSuccess {
                 viewModelScope.launch {
                     _rooms.tryEmit(it)
@@ -372,7 +372,7 @@ class AddNewSlotViewModelImpl @Inject constructor(
     }
 
     private suspend fun getAllUsers() {
-        getAllUsersUseCase.run()
+        getAllUsersUseCase.run(None)
             .onSuccess {
                 viewModelScope.launch {
                     _owners.tryEmit(it)

@@ -35,4 +35,9 @@ object UseCaseModule {
     fun provideSaveNewSlotUseCase(databaseRepository: DatabaseRepository) : SaveNewSlotUseCase {
         return SaveNewSlotUseCase(databaseRepository = databaseRepository)
     }
+
+    @Provides
+    fun provideGetAllSlotsUseCase(databaseRepository: DatabaseRepository) : GetAllSlotsUseCase {
+        return GetAllSlotsUseCase(databaseRepository = databaseRepository)
+    }
 }
