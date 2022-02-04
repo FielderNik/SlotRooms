@@ -1,25 +1,10 @@
 package com.testing.slotrooms
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.testing.slotrooms.presentation.MainScreen
-import com.testing.slotrooms.presentation.Screens
-import com.testing.slotrooms.presentation.addnewslot.AddNewSlotScreen
-import com.testing.slotrooms.presentation.slots.SlotsScreen
-import com.testing.slotrooms.presentation.slots.SlotsViewModel
 import com.testing.slotrooms.ui.theme.MainBackground
 import com.testing.slotrooms.ui.theme.SlotRoomsTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,26 +19,7 @@ class MainActivity : AppCompatActivity() {
             SlotRoomsTheme {
                 Surface(color = MainBackground) {
                     MainScreen()
-//                    SlotsScreen()
 
-                /*    NavHost(
-                        navController = navController,
-                        startDestination = Screens.SlotsScreen.route)
-                    {
-                        composable(Screens.SlotsScreen.route) {
-                            SlotsScreen(navController = navController)
-                        }
-                        composable(
-                            route = Screens.AddNewSlotScreen.route,
-                            arguments = listOf(
-                                navArgument("isNewSlot") {
-                                    type = NavType.BoolType
-                            })
-                        ) {
-                            val isNewSlot = it.arguments?.getBoolean("isNewSlot", true) ?: true
-                            AddNewSlotScreen(isNewSlot = isNewSlot)
-                        }
-                    }*/
                 }
             }
         }

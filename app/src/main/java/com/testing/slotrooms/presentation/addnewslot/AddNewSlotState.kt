@@ -42,9 +42,11 @@ sealed class AddNewSlotEvent {
     object DateTimeError: AddNewSlotEvent(), Effects
     object RoomEmptyError: AddNewSlotEvent(), Effects
     object OwnerEmptyError: AddNewSlotEvent(), Effects
+    object SlotSavedSuccess: AddNewSlotEvent(), Effects
     data class GetRoomsError(val exception: Exception): AddNewSlotState(), Effects
     data class GetUsersError(val exception: Exception): AddNewSlotState(), Effects
     data class SaveSlotError(val exception: Exception): AddNewSlotState(), Effects
+
 }
 
 sealed class AddNewSlotEffect {

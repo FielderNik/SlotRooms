@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +26,7 @@ import androidx.navigation.NavHostController
 import com.testing.slotrooms.R
 import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.model.SlotRoom
+import com.testing.slotrooms.presentation.views.AppTopBarState
 import com.testing.slotrooms.ui.theme.GreenMain
 import com.testing.slotrooms.ui.theme.MainFont
 import com.testing.slotrooms.ui.theme.YellowMain
@@ -35,11 +37,22 @@ import java.util.*
 fun SlotsScreen(
     viewModel: SlotsViewModel = hiltViewModel(),
     navController: NavHostController,
+    appTopBarState: MutableState<AppTopBarState>
 ) {
     val slotsScreenState = viewModel.slotsScreenState.collectAsState()
+    val slotsScreenEffect = viewModel.slotsScreenEffect.collectAsState()
+
+    LaunchedEffect(Unit) {
+        appTopBarState.value = appTopBarState.value.copy(title = "Hello world")
+
+    }
 
     LaunchedEffect(slotsScreenState) {
         viewModel.handleEvent(SlotsScreenEvent.SlotsEnterScreenEvent)
+    }
+
+    LaunchedEffect(slotsScreenEffect) {
+
     }
 
     Column() {

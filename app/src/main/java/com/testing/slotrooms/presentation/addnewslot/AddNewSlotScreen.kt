@@ -6,10 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,6 +23,7 @@ import com.google.android.material.timepicker.TimeFormat
 import com.testing.slotrooms.R
 import com.testing.slotrooms.model.database.entities.Rooms
 import com.testing.slotrooms.model.database.entities.Users
+import com.testing.slotrooms.presentation.views.AppTopBarState
 import com.testing.slotrooms.presentation.views.buttons.ButtonCancel
 import com.testing.slotrooms.presentation.views.buttons.ButtonSave
 import com.testing.slotrooms.presentation.views.snackbars.ErrorSnackbar
@@ -39,8 +37,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun AddNewSlotScreen(
     isNewSlot: Boolean,
+    appTopBarState: MutableState<AppTopBarState>
 ) {
     val scaffoldState = rememberScaffoldState()
+
+    LaunchedEffect(Unit) {
+        appTopBarState.value = appTopBarState.value.copy(title = "GOGOGOG")
+    }
+
+
     Scaffold(
         scaffoldState = scaffoldState,
         snackbarHost = { scaffoldState.snackbarHostState },
@@ -405,6 +410,11 @@ private fun handleEffect(
                     scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_slot_is_busy))
                 }
             }
+            is AddNewSlotEvent.SlotSavedSuccess -> {
+                coroutineScope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.notice_slot_saved_success))
+                }
+            }
         }
     }
 }
@@ -413,5 +423,8 @@ private fun handleEffect(
 @Preview
 @Composable
 fun AddNewSlotScreen_Preview() {
-    AddNewSlotScreen(isNewSlot = true)
+    val topBarState = remember {
+        mutableStateOf(AppTopBarState())
+    }
+    AddNewSlotScreen(isNewSlot = true, appTopBarState = topBarState)
 }

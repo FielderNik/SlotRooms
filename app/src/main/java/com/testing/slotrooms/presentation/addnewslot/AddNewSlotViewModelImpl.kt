@@ -172,6 +172,26 @@ class AddNewSlotViewModelImpl @Inject constructor(
         }
     }
 
+    private fun reduce(event: AddNewSlotEvent, currentState: AddNewSlotState.OpenSlotDialog) {
+        when (event) {
+            is AddNewSlotEvent.SelectedRoomEvent -> {
+                fetchDisplayState(event.room)
+            }
+            is AddNewSlotEvent.SelectedOwnerEvent -> {
+                viewModelScope.launch {
+                    val currentSlotRoom = _slotRoom.value.copy(owner = event.owner)
+                    _slotRoom.emit(currentSlotRoom)
+                    _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(slotRoom = currentSlotRoom))
+                }
+            }
+            is AddNewSlotEvent.OnDialogDismissClicked -> {
+                viewModelScope.launch {
+                    _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(slotRoom = _slotRoom.value))
+                }
+            }
+        }
+    }
+
     private fun reduce(event: AddNewSlotEvent, currentState: AddNewSlotState.OpenDatePicker) {
         when (event) {
             is AddNewSlotEvent.SelectedBeginDateEvent -> {
@@ -211,30 +231,6 @@ class AddNewSlotViewModelImpl @Inject constructor(
         }
     }
 
-    suspend fun resetErrorStatus() {
-        _effect.emit(null)
-    }
-
-
-    private fun reduce(event: AddNewSlotEvent, currentState: AddNewSlotState.OpenSlotDialog) {
-        when (event) {
-            is AddNewSlotEvent.SelectedRoomEvent -> {
-                fetchDisplayState(event.room)
-            }
-            is AddNewSlotEvent.SelectedOwnerEvent -> {
-                viewModelScope.launch {
-                    val currentSlotRoom = _slotRoom.value.copy(owner = event.owner)
-                    _slotRoom.emit(currentSlotRoom)
-                    _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(slotRoom = currentSlotRoom))
-                }
-            }
-            is AddNewSlotEvent.OnDialogDismissClicked -> {
-                viewModelScope.launch {
-                    _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(slotRoom = _slotRoom.value))
-                }
-            }
-        }
-    }
 
     private fun reduce(event: AddNewSlotEvent, currentState: AddNewSlotState.DisplaySlotState) {
         when (event) {
@@ -262,6 +258,21 @@ class AddNewSlotViewModelImpl @Inject constructor(
         }
     }
 
+    private fun reduce(event: AddNewSlotEvent, currentState: AddNewSlotState.EmptyState) {
+        when (event) {
+            is AddNewSlotEvent.OnDialogClicked -> {
+                openDialog(event.dialogType)
+            }
+            is AddNewSlotEvent.EnterScreen -> {
+                fetchDisplayState(null)
+            }
+        }
+    }
+
+    suspend fun resetErrorStatus() {
+        _effect.emit(null)
+    }
+
     private fun saveSlot() {
         viewModelScope.launch(Dispatchers.IO) {
             if (checkSlot()) {
@@ -275,7 +286,10 @@ class AddNewSlotViewModelImpl @Inject constructor(
                         }
                     }
                     .onSuccess {
-                        Log.d("milk", "OK slot: ${slotRoom.value}")
+                        viewModelScope.launch {
+                            _effect.emit(AddNewSlotEvent.SlotSavedSuccess)
+                        }
+
                     }
 
             } else {
@@ -327,17 +341,6 @@ class AddNewSlotViewModelImpl @Inject constructor(
                 val currentSlotRoom = _slotRoom.value.copy(room = room)
                 _slotRoom.emit(currentSlotRoom)
                 _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(slotRoom = currentSlotRoom))
-            }
-        }
-    }
-
-    private fun reduce(event: AddNewSlotEvent, currentState: AddNewSlotState.EmptyState) {
-        when (event) {
-            is AddNewSlotEvent.OnDialogClicked -> {
-                openDialog(event.dialogType)
-            }
-            is AddNewSlotEvent.EnterScreen -> {
-                fetchDisplayState(null)
             }
         }
     }

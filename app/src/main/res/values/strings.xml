@@ -26,4 +26,7 @@
     <string name="error_get_rooms">Load rooms error</string>
     <string name="error_get_users">Load users error</string>
     <string name="error_slot_is_busy">Slot is busy</string>
+
+    <!--notifications-->
+    <string name="notice_slot_saved_success">Slot saved success</string>
 </resources>
