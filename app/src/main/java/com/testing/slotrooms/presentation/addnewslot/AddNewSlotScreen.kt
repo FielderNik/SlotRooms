@@ -1,7 +1,6 @@
 package com.testing.slotrooms.presentation.addnewslot
 
 import android.content.res.Resources
-import androidx.activity.compose.BackHandler
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,19 +9,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.testing.slotrooms.R
 import com.testing.slotrooms.model.database.entities.Rooms
 import com.testing.slotrooms.model.database.entities.Users
+import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.views.AppTopBarState
 import com.testing.slotrooms.presentation.views.buttons.ButtonCancel
 import com.testing.slotrooms.presentation.views.buttons.ButtonSave
@@ -37,14 +36,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun AddNewSlotScreen(
     isNewSlot: Boolean,
-    appTopBarState: MutableState<AppTopBarState>
+    appTopBarState: MutableState<AppTopBarState>,
+    navController: NavHostController
 ) {
     val scaffoldState = rememberScaffoldState()
+    val resources = LocalContext.current.resources
 
     LaunchedEffect(Unit) {
-        appTopBarState.value = appTopBarState.value.copy(title = "GOGOGOG")
+        setupTopBar(appTopBarState = appTopBarState, resources = resources, isNewSlot = isNewSlot)
     }
-
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -53,11 +53,8 @@ fun AddNewSlotScreen(
         backgroundColor = MainBackground
 
     ) {
-
         Column(modifier = Modifier.fillMaxSize()) {
-            ToolbarAddNewSlot(isNewSlot)
-            RoomEditBlock(viewModel = hiltViewModel<AddNewSlotViewModelImpl>(),scaffoldState = scaffoldState)
-
+            RoomEditBlock(viewModel = hiltViewModel(), scaffoldState = scaffoldState, navController = navController)
             ErrorSnackbar(
                 snackbarHostState = scaffoldState.snackbarHostState,
                 onDismiss = { scaffoldState.snackbarHostState.currentSnackbarData?.dismiss() },
@@ -67,33 +64,20 @@ fun AddNewSlotScreen(
     }
 }
 
-@Composable
-fun ToolbarAddNewSlot(
-    isNewSlot: Boolean
-) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
-            contentDescription = null
-        )
-        Text(
-            text =
-            if (isNewSlot) {
-                stringResource(id = R.string.title_new_slot)
-            } else {
-                stringResource(id = R.string.title_edit_slot)
-            },
-            style = MaterialTheme.typography.h1,
-            modifier = Modifier.weight(1f),
-            textAlign = TextAlign.Center
-        )
-    }
+private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources: Resources, isNewSlot: Boolean) {
+    val title = if (isNewSlot) resources.getString(R.string.title_new_slot) else resources.getString(R.string.title_edit_slot)
+    appTopBarState.value = appTopBarState.value.copy(
+        title = title,
+        isShowBack = true
+    )
 }
+
 
 @Composable
 fun RoomEditBlock(
     viewModel: AddNewSlotViewModelImpl,
-    scaffoldState: ScaffoldState
+    scaffoldState: ScaffoldState,
+    navController: NavHostController
 ) {
     val activity = LocalContext.current as AppCompatActivity
     val viewState = viewModel.addNewSlotState.collectAsState()
@@ -159,7 +143,8 @@ fun RoomEditBlock(
                 scaffoldState = scaffoldState,
                 coroutineScope = coroutineScope,
                 effect = it,
-                resources = resources
+                resources = resources,
+                navController = navController
             )
             viewModel.resetErrorStatus()
         }
@@ -201,6 +186,7 @@ fun RoomEditBlock(
             },
             onCancelClicked = {
                 viewModel.handleEvent(AddNewSlotEvent.CancelSlotEvent)
+                navController.navigate(Screens.Slots.screenRoute)
             }
         )
 
@@ -371,7 +357,8 @@ private fun handleEffect(
     scaffoldState: ScaffoldState,
     coroutineScope: CoroutineScope,
     effect: Effects?,
-    resources: Resources
+    resources: Resources,
+    navController: NavHostController
 ) {
     effect?.let { effectEvent ->
         when (effectEvent) {
@@ -412,7 +399,9 @@ private fun handleEffect(
             }
             is AddNewSlotEvent.SlotSavedSuccess -> {
                 coroutineScope.launch {
+
                     scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.notice_slot_saved_success))
+                    navController.navigate(Screens.Slots.screenRoute)
                 }
             }
         }
@@ -426,5 +415,6 @@ fun AddNewSlotScreen_Preview() {
     val topBarState = remember {
         mutableStateOf(AppTopBarState())
     }
-    AddNewSlotScreen(isNewSlot = true, appTopBarState = topBarState)
+    val navController = rememberNavController()
+    AddNewSlotScreen(isNewSlot = true, appTopBarState = topBarState, navController = navController)
 }

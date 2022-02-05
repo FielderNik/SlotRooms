@@ -14,4 +14,7 @@ val MainBackground = Color(0xFFFDFAF2)
 val RedMain = Color(0xFFE6908C)
 val MainSurface = Color(0xFF8F7944)
 val GreenDark = Color(0xFF175F23)
+val MainBlue = Color(0xFFB0DAD2)
+
+val GreyIcon = Color(0xFF848484)
 

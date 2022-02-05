@@ -30,6 +30,9 @@ interface SlotsDao {
     @Query("SELECT * FROM (SELECT * FROM Slots WHERE (:beginTime BETWEEN startTime AND endTime) OR (:endTime BETWEEN startTime AND endTime)) WHERE :roomId = roomId")
     suspend fun getSlotsByRoomIdAndTime(roomId: String, beginTime: Long, endTime: Long) : List<Slots>
 
+    @Query("SELECT * FROM Rooms WHERE name = :roomName")
+    suspend fun getAllRoomsByName(roomName: String) : List<Rooms>
+
     @Transaction
     @Query("SELECT * FROM Slots")
     fun getAllSlotsRoomsUsersEntities() : List<SlotsRoomsUsersEntity>

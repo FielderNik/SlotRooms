@@ -1,5 +1,6 @@
 package com.testing.slotrooms.presentation.slots
 
+import android.content.res.Resources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,17 +8,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,6 +24,7 @@ import com.testing.slotrooms.R
 import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.model.SlotRoom
 import com.testing.slotrooms.presentation.views.AppTopBarState
+import com.testing.slotrooms.presentation.views.LoadingSlots
 import com.testing.slotrooms.ui.theme.GreenMain
 import com.testing.slotrooms.ui.theme.MainFont
 import com.testing.slotrooms.ui.theme.YellowMain
@@ -41,10 +39,10 @@ fun SlotsScreen(
 ) {
     val slotsScreenState = viewModel.slotsScreenState.collectAsState()
     val slotsScreenEffect = viewModel.slotsScreenEffect.collectAsState()
+    val resources = LocalContext.current.resources
 
     LaunchedEffect(Unit) {
-        appTopBarState.value = appTopBarState.value.copy(title = "Hello world")
-
+        setupTopBar(appTopBarState = appTopBarState, resources = resources)
     }
 
     LaunchedEffect(slotsScreenState) {
@@ -56,8 +54,6 @@ fun SlotsScreen(
     }
 
     Column() {
-        ToolbarSlots()
-
 
         when (val state = slotsScreenState.value) {
             is SlotsScreenState.SlotsEmptyScreen -> {
@@ -67,7 +63,7 @@ fun SlotsScreen(
             }
             is SlotsScreenState.SlotsLoading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    LoadingSlots()
                 }
             }
             is SlotsScreenState.SlotsSuccess -> {
@@ -77,29 +73,16 @@ fun SlotsScreen(
     }
 
 
-
 }
 
-
-@Composable
-fun ToolbarSlots() {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
-            contentDescription = null
-        )
-        Text(
-            text = stringResource(id = R.string.title_slots),
-            style = MaterialTheme.typography.h1,
-            modifier = Modifier.weight(1f),
-            textAlign = TextAlign.Center
-        )
-        Icon(
-            painter = painterResource(id = R.drawable.ic_baseline_filter_list_24),
-            contentDescription = null
-        )
-    }
+private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources: Resources) {
+    appTopBarState.value = appTopBarState.value.copy(
+        title = resources.getString(R.string.title_slots),
+        isShowBack = false,
+        isShowFilter = true
+    )
 }
+
 
 @Composable
 fun SlotsList(slots: List<SlotRoom>, navController: NavController) {

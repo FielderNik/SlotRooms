@@ -29,7 +29,7 @@ fun NavigationGraph(navController: NavHostController, appTopBarState: MutableSta
                 })
         ) {
             val isNewSlot = it.arguments?.getBoolean("isNewSlot", true) ?: true
-            AddNewSlotScreen(isNewSlot = isNewSlot, appTopBarState = appTopBarState)
+            AddNewSlotScreen(isNewSlot = isNewSlot, appTopBarState = appTopBarState, navController = navController)
         }
 
     }

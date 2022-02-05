@@ -13,6 +13,7 @@ import com.testing.slotrooms.model.database.entities.Users
 import com.testing.slotrooms.presentation.addnewslot.AddNewSlotEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -60,6 +61,7 @@ class SlotsViewModel @Inject constructor(
     private fun updateSlotScreen() {
         viewModelScope.launch {
             _slotsScreenState.emit(SlotsScreenState.SlotsLoading)
+            delay(10_000L)
             withContext(Dispatchers.IO) {
                 getAllSlotsUseCase.run(None)
             }
