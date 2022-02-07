@@ -14,6 +14,6 @@ data class SlotsRoomsUsersEntity(
         parentColumn = "ownerId",
         entityColumn = "id"
     )
-    val owner: Users
+    val owner: Users? = null
 
 )

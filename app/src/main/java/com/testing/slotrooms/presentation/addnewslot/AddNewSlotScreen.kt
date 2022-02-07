@@ -25,8 +25,6 @@ import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.views.AppTopBarState
 import com.testing.slotrooms.presentation.views.buttons.ButtonCancel
 import com.testing.slotrooms.presentation.views.buttons.ButtonSave
-import com.testing.slotrooms.presentation.views.snackbars.ErrorSnackbar
-import com.testing.slotrooms.ui.theme.MainBackground
 import com.testing.slotrooms.utils.dateFormat
 import com.testing.slotrooms.utils.timeFormat
 import kotlinx.coroutines.CoroutineScope
@@ -37,31 +35,28 @@ import kotlinx.coroutines.launch
 fun AddNewSlotScreen(
     isNewSlot: Boolean,
     appTopBarState: MutableState<AppTopBarState>,
-    navController: NavHostController
+    navController: NavHostController,
+    scaffoldState: ScaffoldState
 ) {
-    val scaffoldState = rememberScaffoldState()
     val resources = LocalContext.current.resources
 
     LaunchedEffect(Unit) {
         setupTopBar(appTopBarState = appTopBarState, resources = resources, isNewSlot = isNewSlot)
     }
+    RoomEditBlock(viewModel = hiltViewModel(), scaffoldState = scaffoldState, navController = navController)
 
-    Scaffold(
-        scaffoldState = scaffoldState,
-        snackbarHost = { scaffoldState.snackbarHostState },
-        modifier = Modifier.fillMaxSize(),
-        backgroundColor = MainBackground
-
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            RoomEditBlock(viewModel = hiltViewModel(), scaffoldState = scaffoldState, navController = navController)
-            ErrorSnackbar(
-                snackbarHostState = scaffoldState.snackbarHostState,
-                onDismiss = { scaffoldState.snackbarHostState.currentSnackbarData?.dismiss() },
-                modifier = Modifier.padding(top = 100.dp)
-            )
-        }
-    }
+//    Scaffold(
+//        scaffoldState = scaffoldState,
+//        snackbarHost = { scaffoldState.snackbarHostState },
+//        modifier = Modifier.fillMaxSize(),
+//        backgroundColor = MainBackground
+//
+//    ) {
+//        Column(modifier = Modifier.fillMaxSize()) {
+//            RoomEditBlock(viewModel = hiltViewModel(), scaffoldState = scaffoldState, navController = navController)
+//
+//        }
+//    }
 }
 
 private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources: Resources, isNewSlot: Boolean) {
@@ -95,7 +90,8 @@ fun RoomEditBlock(
         is AddNewSlotState.OpenSlotDialog -> {
             ChoiceDialogView(dialogType = state.dialogType, viewModel = viewModel)
         }
-        is AddNewSlotState.DisplaySlotState -> {}
+        is AddNewSlotState.DisplaySlotState -> {
+        }
         is AddNewSlotState.OpenDatePicker -> {
             showDatePicker(
                 activity = activity,
@@ -399,7 +395,6 @@ private fun handleEffect(
             }
             is AddNewSlotEvent.SlotSavedSuccess -> {
                 coroutineScope.launch {
-
                     scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.notice_slot_saved_success))
                     navController.navigate(Screens.Slots.screenRoute)
                 }
@@ -416,5 +411,6 @@ fun AddNewSlotScreen_Preview() {
         mutableStateOf(AppTopBarState())
     }
     val navController = rememberNavController()
-    AddNewSlotScreen(isNewSlot = true, appTopBarState = topBarState, navController = navController)
+    val scaffoldState = rememberScaffoldState()
+    AddNewSlotScreen(isNewSlot = true, appTopBarState = topBarState, navController = navController, scaffoldState = scaffoldState)
 }

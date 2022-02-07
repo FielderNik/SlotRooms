@@ -24,5 +24,15 @@ sealed class SettingsScreenEvent {
 }
 
 sealed class SettingsScreenEffect(val exception: Exception? = null) {
-    data class NewRoomError(val ex: Exception) : SettingsScreenEffect(exception = ex)
+
+    sealed class SettingsScreenError(exception: Exception? = null) : SettingsScreenEffect(exception) {
+        class NewRoomError(ex: Exception) : SettingsScreenError(exception = ex)
+        class NewUserError(ex: Exception) : SettingsScreenError(exception = ex)
+    }
+
+    sealed class SettingsScreenSuccess() : SettingsScreenEffect() {
+        object NewRoomSaveSuccess : SettingsScreenSuccess()
+        object NewUserSaveSuccess : SettingsScreenSuccess()
+    }
+
 }

@@ -26,11 +26,16 @@
     <!--errors-->
     <string name="error_slot_date_time">Begin time must be early end time</string>
     <string name="error_slot_room_is_empty">Room must not be empty</string>
-    <string name="error_slot_owner_is_empty">Room must not be empty</string>
+    <string name="error_slot_owner_is_empty">Owner must not be empty</string>
     <string name="error_get_rooms">Load rooms error</string>
     <string name="error_get_users">Load users error</string>
     <string name="error_slot_is_busy">Slot is busy</string>
+    
+    <string name="error_user_with_this_name_already_exists">User with this name already exists</string>
+    <string name="error_room_with_this_name_already_exists">Room with this name already exists</string>
 
     <!--notifications-->
     <string name="notice_slot_saved_success">Slot saved success</string>
+    <string name="notice_room_saved_success">Room saved success</string>
+    <string name="notice_user_saved_success">User saved success</string>
 </resources>

@@ -66,7 +66,7 @@ sealed class Either<out L, out R> {
      * @see Left
      * @see Right
      */
-    fun fold(fnL: (L) -> Any, fnR: (R) -> Any): Any =
+    inline fun fold(fnL: (L) -> Any, fnR: (R) -> Any): Any =
         when (this) {
             is Left -> fnL(a)
             is Right -> fnR(b)
@@ -111,7 +111,7 @@ fun <L, R> Either<L, R>.getOrElse(value: R): R =
  * the onFailure functionality passed as a parameter, but, overall will still return an either
  * object so you chain calls.
  */
-fun <L, R> Either<L, R>.onFailure(fn: (failure: L) -> Unit): Either<L, R> =
+inline fun <L, R> Either<L, R>.onFailure(fn: (failure: L) -> Unit): Either<L, R> =
         this.apply { if (this is Either.Left) fn(a) }
 
 /**
@@ -119,7 +119,7 @@ fun <L, R> Either<L, R>.onFailure(fn: (failure: L) -> Unit): Either<L, R> =
  * the onSuccess functionality passed as a parameter, but, overall will still return an either
  * object so you chain calls.
  */
-fun <L, R> Either<L, R>.onSuccess(fn: (success: R) -> Unit): Either<L, R> =
+inline fun <L, R> Either<L, R>.onSuccess(fn: (success: R) -> Unit): Either<L, R> =
         this.apply { if (this is Either.Right) fn(b) }
 
 

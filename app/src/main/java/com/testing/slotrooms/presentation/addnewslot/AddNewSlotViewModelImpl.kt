@@ -281,17 +281,11 @@ class AddNewSlotViewModelImpl @Inject constructor(
 
                 saveNewSlotUseCase.run(slotEntity)
                     .onFailure {
-                        viewModelScope.launch {
                             _effect.emit(AddNewSlotEvent.SaveSlotError(it))
-                        }
                     }
                     .onSuccess {
-                        viewModelScope.launch {
                             _effect.emit(AddNewSlotEvent.SlotSavedSuccess)
-                        }
-
                     }
-
             } else {
                 Log.d("milk", "WRONG! slot: ${slotRoom.value}")
             }
@@ -310,10 +304,10 @@ class AddNewSlotViewModelImpl @Inject constructor(
             _effect.emit(AddNewSlotEvent.DateTimeError)
             isChecked = false
         }
-        if (slotRoom.owner.name.isEmpty()) {
-            _effect.emit(AddNewSlotEvent.OwnerEmptyError)
-            isChecked = false
-        }
+//        if (slotRoom.owner.name.isEmpty()) {
+//            _effect.emit(AddNewSlotEvent.OwnerEmptyError)
+//            isChecked = false
+//        }
         return isChecked
     }
 

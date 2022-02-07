@@ -4,10 +4,7 @@ import android.content.res.Resources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -20,18 +17,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.testing.slotrooms.R
 import com.testing.slotrooms.presentation.views.AppTopBarState
 import com.testing.slotrooms.ui.theme.GreenMain
 import com.testing.slotrooms.ui.theme.GreyIcon
 import com.testing.slotrooms.ui.theme.MainBlue
 import com.testing.slotrooms.ui.theme.YellowMain
+import kotlinx.coroutines.flow.collect
 
 
 @Composable
 fun SettingsScreen(
     appTopBarState: MutableState<AppTopBarState>,
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel(),
+    navController: NavHostController,
+    scaffoldState: ScaffoldState
 ) {
     val resources = LocalContext.current.resources
     val settingsScreenState = viewModel.settingsScreenState.collectAsState()
@@ -42,6 +43,19 @@ fun SettingsScreen(
 
     LaunchedEffect(settingsScreenState) {
         viewModel.handleEvent(SettingsScreenEvent.OpenDefaultScreen)
+    }
+
+
+    LaunchedEffect(Unit) {
+        viewModel.settingsScreenEffect.collect {
+            handleEffect(
+                scaffoldState = scaffoldState,
+                effect = it,
+                resources = resources,
+                navController = navController
+            )
+            viewModel.resetErrorStatus()
+        }
     }
 
     when (val state = settingsScreenState.value) {
@@ -213,4 +227,51 @@ private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources:
         isShowBack = false,
         isShowFilter = false
     )
+}
+
+private suspend fun handleEffect(
+    scaffoldState: ScaffoldState,
+    effect: SettingsScreenEffect?,
+    resources: Resources,
+    navController: NavHostController
+) {
+    when (effect) {
+        is SettingsScreenEffect.SettingsScreenError -> {
+            handleErrorEffect(scaffoldState = scaffoldState, effect = effect, resources = resources)
+        }
+        is SettingsScreenEffect.SettingsScreenSuccess -> {
+            handleSuccessEffect(scaffoldState = scaffoldState, effect = effect, resources = resources)
+        }
+    }
+}
+
+private suspend fun handleSuccessEffect(
+    scaffoldState: ScaffoldState,
+    effect: SettingsScreenEffect.SettingsScreenSuccess?,
+    resources: Resources,
+) {
+    when (effect) {
+        SettingsScreenEffect.SettingsScreenSuccess.NewRoomSaveSuccess -> {
+            scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.notice_room_saved_success))
+
+        }
+        SettingsScreenEffect.SettingsScreenSuccess.NewUserSaveSuccess -> {
+            scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.notice_user_saved_success))
+        }
+    }
+}
+
+private suspend fun handleErrorEffect(
+    scaffoldState: ScaffoldState,
+    effect: SettingsScreenEffect.SettingsScreenError?,
+    resources: Resources,
+) {
+    when (effect) {
+        is SettingsScreenEffect.SettingsScreenError.NewRoomError -> {
+            scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_room_with_this_name_already_exists))
+        }
+        is SettingsScreenEffect.SettingsScreenError.NewUserError -> {
+            scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_user_with_this_name_already_exists))
+        }
+    }
 }

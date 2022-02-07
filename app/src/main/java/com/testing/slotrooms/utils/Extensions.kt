@@ -31,14 +31,3 @@ fun SlotRoom.toSlotsEntity() : Slots {
     )
 }
 
-fun SlotsRoomsUsersEntity.toSlotRoom() : SlotRoom {
-    return SlotRoom(
-        id = this.slots.id,
-        room = this.room,
-        owner = this.owner,
-        comments = this.slots.comment,
-        beginDateTime = this.slots.startTime,
-        endDateTime = this.slots.endTime
-    )
-}
-

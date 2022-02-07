@@ -1,12 +1,12 @@
 package com.testing.slotrooms.presentation.settings
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.testing.slotrooms.core.EventHandler
 import com.testing.slotrooms.core.onFailure
 import com.testing.slotrooms.core.onSuccess
 import com.testing.slotrooms.domain.usecases.AddNewRoomUseCase
+import com.testing.slotrooms.domain.usecases.AddNewUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val addNewRoomUseCase: AddNewRoomUseCase
+    private val addNewRoomUseCase: AddNewRoomUseCase,
+    private val addNewUserUseCase: AddNewUserUseCase
 ) : ViewModel(), EventHandler<SettingsScreenEvent> {
 
     private val _settingsScreenState: MutableStateFlow<SettingsScreenState> = MutableStateFlow(SettingsScreenState.DefaultState)
@@ -47,42 +48,54 @@ class SettingsViewModel @Inject constructor(
                     _settingsScreenState.emit(SettingsScreenState.NewUserDialogOpen)
                 }
             }
-            SettingsScreenEvent.EmptySlotClicked -> {}
-            SettingsScreenEvent.OpenDefaultScreen -> {}
+            SettingsScreenEvent.EmptySlotClicked -> {
+            }
+            SettingsScreenEvent.OpenDefaultScreen -> {
+            }
         }
     }
 
     private fun reduce(currentState: SettingsScreenState.NewRoomDialogOpen, event: SettingsScreenEvent) {
         when (event) {
             is SettingsScreenEvent.OpenDefaultScreen -> {
-                viewModelScope.launch {
-                    _settingsScreenState.emit(SettingsScreenState.DefaultState)
-                }
+                produceDefaultState()
             }
-            SettingsScreenEvent.EmptySlotClicked -> {}
-            SettingsScreenEvent.NewRoom.NewRoomClicked -> {}
+            SettingsScreenEvent.EmptySlotClicked -> {
+            }
+            SettingsScreenEvent.NewRoom.NewRoomClicked -> {
+            }
             is SettingsScreenEvent.NewRoom.NewRoomConfirmed -> {
                 saveNewRoom(event.roomName)
             }
-            SettingsScreenEvent.NewUser.NewUserClicked -> {}
-            is SettingsScreenEvent.NewUser.NewUserConfirmed -> {}
+            SettingsScreenEvent.NewUser.NewUserClicked -> {
+            }
+            is SettingsScreenEvent.NewUser.NewUserConfirmed -> {
+            }
         }
     }
 
     private fun reduce(currentState: SettingsScreenState.NewUserDialogOpen, event: SettingsScreenEvent) {
         when (event) {
             is SettingsScreenEvent.OpenDefaultScreen -> {
-                viewModelScope.launch {
-                    _settingsScreenState.emit(SettingsScreenState.DefaultState)
-                }
+                produceDefaultState()
             }
-            SettingsScreenEvent.EmptySlotClicked -> {}
-            SettingsScreenEvent.NewRoom.NewRoomClicked -> {}
-            is SettingsScreenEvent.NewRoom.NewRoomConfirmed -> {}
-            SettingsScreenEvent.NewUser.NewUserClicked -> {}
+            SettingsScreenEvent.EmptySlotClicked -> {
+            }
+            SettingsScreenEvent.NewRoom.NewRoomClicked -> {
+            }
+            is SettingsScreenEvent.NewRoom.NewRoomConfirmed -> {
+            }
+            SettingsScreenEvent.NewUser.NewUserClicked -> {
+            }
             is SettingsScreenEvent.NewUser.NewUserConfirmed -> {
-
+                saveNewUser(event.userName)
             }
+        }
+    }
+
+    private fun produceDefaultState() {
+        viewModelScope.launch {
+            _settingsScreenState.emit(SettingsScreenState.DefaultState)
         }
     }
 
@@ -93,23 +106,35 @@ class SettingsViewModel @Inject constructor(
                 addNewRoomUseCase.run(roomName)
             }
                 .onSuccess {
-                    Log.d("milk", "save room : success")
-                    launch {
-                        _settingsScreenState.emit(SettingsScreenState.DefaultState)
-                    }
+                    _settingsScreenEffect.emit(SettingsScreenEffect.SettingsScreenSuccess.NewRoomSaveSuccess)
                 }
                 .onFailure {
-                    launch {
-                        Log.d("milk", "save room : exception")
-                        _settingsScreenEffect.emit(SettingsScreenEffect.NewRoomError(it))
-                        _settingsScreenState.emit(SettingsScreenState.DefaultState)
-                    }
+                    _settingsScreenEffect.emit(SettingsScreenEffect.SettingsScreenError.NewRoomError(it))
                 }
+            _settingsScreenState.emit(SettingsScreenState.DefaultState)
+
         }
     }
 
     private fun saveNewUser(userName: String) {
+        viewModelScope.launch {
+            _settingsScreenState.emit(SettingsScreenState.Loading)
+            withContext(Dispatchers.IO) {
+                addNewUserUseCase.run(userName)
+            }
+                .onSuccess {
+                    _settingsScreenEffect.emit(SettingsScreenEffect.SettingsScreenSuccess.NewUserSaveSuccess)
+                }
+                .onFailure {
+                    _settingsScreenEffect.emit(SettingsScreenEffect.SettingsScreenError.NewUserError(it))
+                }
+            _settingsScreenState.emit(SettingsScreenState.DefaultState)
 
+        }
+    }
+
+    suspend fun resetErrorStatus() {
+        _settingsScreenEffect.emit(null)
     }
 
 

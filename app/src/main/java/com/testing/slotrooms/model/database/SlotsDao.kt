@@ -33,6 +33,9 @@ interface SlotsDao {
     @Query("SELECT * FROM Rooms WHERE name = :roomName")
     suspend fun getAllRoomsByName(roomName: String) : List<Rooms>
 
+    @Query("SELECT * FROM Users WHERE name = :userName")
+    suspend fun getAllUsersByName(userName: String) : List<Users>
+
     @Transaction
     @Query("SELECT * FROM Slots")
     fun getAllSlotsRoomsUsersEntities() : List<SlotsRoomsUsersEntity>

@@ -45,4 +45,9 @@ object UseCaseModule {
     fun provideAddNewRoomUseCase(databaseRepository: DatabaseRepository) : AddNewRoomUseCase {
         return AddNewRoomUseCase(databaseRepository = databaseRepository)
     }
+
+    @Provides
+    fun provideAddNewUserUseCase(databaseRepository: DatabaseRepository) : AddNewUserUseCase {
+        return AddNewUserUseCase(databaseRepository = databaseRepository)
+    }
 }

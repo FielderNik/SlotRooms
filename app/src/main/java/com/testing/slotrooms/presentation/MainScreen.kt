@@ -25,6 +25,7 @@ fun MainScreen() {
     val appTopBarState = remember {
         mutableStateOf(AppTopBarState())
     }
+    val scaffoldState = rememberScaffoldState()
 
     Scaffold(
         bottomBar = {
@@ -52,11 +53,13 @@ fun MainScreen() {
         topBar = {
             TopBarSlot(appTopBarState = appTopBarState.value, navController = navController)
 
-        }
+        },
+        scaffoldState = scaffoldState
+
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
 
-            NavigationGraph(navController = navController, appTopBarState = appTopBarState)
+            NavigationGraph(navController = navController, appTopBarState = appTopBarState, scaffoldState = scaffoldState)
         }
     }
 
@@ -78,9 +81,11 @@ private fun TopBarSlot(appTopBarState: AppTopBarState, navController: NavControl
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
                         contentDescription = null,
-                        modifier = Modifier.clickable {
-                            navController.navigateUp()
-                        }.padding(4.dp)
+                        modifier = Modifier
+                            .clickable {
+                                navController.navigateUp()
+                            }
+                            .padding(4.dp)
                     )
                 }
             }
