@@ -38,5 +38,9 @@ interface SlotsDao {
 
     @Transaction
     @Query("SELECT * FROM Slots")
-    fun getAllSlotsRoomsUsersEntities() : List<SlotsRoomsUsersEntity>
+    suspend fun getAllSlotsRoomsUsersEntities() : List<SlotsRoomsUsersEntity>
+
+    @Transaction
+    @Query("SELECT * FROM Slots WHERE id = :slotId")
+    suspend fun getSlotRoomById(slotId: String) : SlotsRoomsUsersEntity
 }

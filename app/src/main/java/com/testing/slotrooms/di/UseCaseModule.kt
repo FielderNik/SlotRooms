@@ -1,5 +1,6 @@
 package com.testing.slotrooms.di
 
+import com.testing.slotrooms.domain.mappers.SlotsRoomsUsersEntityToSlotRoomMapper
 import com.testing.slotrooms.domain.repositoties.DatabaseRepository
 import com.testing.slotrooms.domain.usecases.*
 import dagger.Module
@@ -12,42 +13,50 @@ import dagger.hilt.android.components.ActivityRetainedComponent
 object UseCaseModule {
 
     @Provides
-    fun provideAddDefaultRoomsUseCase(databaseRepository: DatabaseRepository) : AddDefaultRoomsUseCase {
+    fun provideAddDefaultRoomsUseCase(databaseRepository: DatabaseRepository): AddDefaultRoomsUseCase {
         return AddDefaultRoomsUseCase(databaseRepository = databaseRepository)
     }
 
     @Provides
-    fun provideAddDefaultUsersUseCase(databaseRepository: DatabaseRepository) : AddDefaultUsersUseCase {
+    fun provideAddDefaultUsersUseCase(databaseRepository: DatabaseRepository): AddDefaultUsersUseCase {
         return AddDefaultUsersUseCase(databaseRepository = databaseRepository)
     }
 
     @Provides
-    fun provideGetAllRoomsUseCase(databaseRepository: DatabaseRepository) : GetAllRoomsUseCase {
+    fun provideGetAllRoomsUseCase(databaseRepository: DatabaseRepository): GetAllRoomsUseCase {
         return GetAllRoomsUseCase(databaseRepository = databaseRepository)
     }
 
     @Provides
-    fun provideGetAllUsersUseCase(databaseRepository: DatabaseRepository) : GetAllUsersUseCase {
+    fun provideGetAllUsersUseCase(databaseRepository: DatabaseRepository): GetAllUsersUseCase {
         return GetAllUsersUseCase(databaseRepository = databaseRepository)
     }
 
     @Provides
-    fun provideSaveNewSlotUseCase(databaseRepository: DatabaseRepository) : SaveNewSlotUseCase {
+    fun provideSaveNewSlotUseCase(databaseRepository: DatabaseRepository): SaveNewSlotUseCase {
         return SaveNewSlotUseCase(databaseRepository = databaseRepository)
     }
 
     @Provides
-    fun provideGetAllSlotsUseCase(databaseRepository: DatabaseRepository) : GetAllSlotsUseCase {
+    fun provideGetAllSlotsUseCase(databaseRepository: DatabaseRepository): GetAllSlotsUseCase {
         return GetAllSlotsUseCase(databaseRepository = databaseRepository)
     }
 
     @Provides
-    fun provideAddNewRoomUseCase(databaseRepository: DatabaseRepository) : AddNewRoomUseCase {
+    fun provideAddNewRoomUseCase(databaseRepository: DatabaseRepository): AddNewRoomUseCase {
         return AddNewRoomUseCase(databaseRepository = databaseRepository)
     }
 
     @Provides
-    fun provideAddNewUserUseCase(databaseRepository: DatabaseRepository) : AddNewUserUseCase {
+    fun provideAddNewUserUseCase(databaseRepository: DatabaseRepository): AddNewUserUseCase {
         return AddNewUserUseCase(databaseRepository = databaseRepository)
+    }
+
+    @Provides
+    fun provideGetSlotRoomById(
+        databaseRepository: DatabaseRepository,
+        slotsRoomsUsersEntityToSlotRoomMapper: SlotsRoomsUsersEntityToSlotRoomMapper
+    ): GetSlotRoomByIdUseCase {
+        return GetSlotRoomByIdUseCase(databaseRepository, slotsRoomsUsersEntityToSlotRoomMapper)
     }
 }

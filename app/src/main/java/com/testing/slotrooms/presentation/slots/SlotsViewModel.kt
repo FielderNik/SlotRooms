@@ -24,7 +24,7 @@ class SlotsViewModel @Inject constructor(
     val slotsScreenState: StateFlow<SlotsScreenState> = _slotsScreenState
 
     private val _slotsScreenEffect: MutableStateFlow<SlotsScreenEffect?> = MutableStateFlow(null)
-    val slotsScreenEffect: StateFlow<SlotsScreenEffect?> = _slotsScreenEffect
+    val slotsScreenEffect: StateFlow<SlotsScreenEffect?> = _slotsScreenEffect // TODO переписать на Channel
 
     override fun handleEvent(event: SlotsScreenEvent) {
         when (val currentState = _slotsScreenState.value) {

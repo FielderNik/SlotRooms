@@ -28,7 +28,7 @@ sealed class AddNewSlotEvent {
     object CommentClicked: AddNewSlotEvent(), UI
     data class SelectedRoomEvent(val room: Rooms): AddNewSlotEvent(), UI
     data class SelectedOwnerEvent(val owner: Users): AddNewSlotEvent(), UI
-    object EnterScreen: AddNewSlotEvent(), UI
+    data class EnterScreen(val slotRoomId: String? = null): AddNewSlotEvent(), UI
     data class SelectedBeginDateEvent(val beginDateMillis: Long): AddNewSlotEvent(), UI
     data class SelectedBeginTimeEvent(val beginTimeHour: Int, val beginTimeMinutes: Int): AddNewSlotEvent(), UI
     data class SelectedEndDateEvent(val endDateMillis: Long): AddNewSlotEvent(), UI

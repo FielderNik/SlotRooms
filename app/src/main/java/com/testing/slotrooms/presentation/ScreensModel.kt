@@ -4,9 +4,12 @@ import com.testing.slotrooms.R
 
 
 sealed class Screens(val title: String, val icon: Int, val screenRoute: String) {
-    object AddNewSlotScreen : Screens(title = "AddNewSlot", icon = R.drawable.ic_add_24, screenRoute = "AddNewSlotScreen/{isNewSlot}", ) {
-        fun passIsNewSlot(isNewSlot: Boolean) : String =
-            "AddNewSlotScreen/$isNewSlot"
+    object AddNewSlotScreen : Screens(
+        title = "AddNewSlot",
+        icon = R.drawable.ic_add_24,
+        screenRoute = "AddNewSlotScreen?slotRoomId={slotRoomId}",
+    ) {
+        fun passSlotRoomId(slotRoomId: String?) : String  = "AddNewSlotScreen?slotRoomId=$slotRoomId"
     }
 
     object Slots : Screens("Slots", R.drawable.ic_slots, "SlotsScreen")

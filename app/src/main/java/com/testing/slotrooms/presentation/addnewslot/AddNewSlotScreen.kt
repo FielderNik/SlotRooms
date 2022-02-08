@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AddNewSlotScreen(
-    isNewSlot: Boolean,
+    slotRoomId: String?,
     appTopBarState: MutableState<AppTopBarState>,
     navController: NavHostController,
     scaffoldState: ScaffoldState
@@ -41,22 +41,10 @@ fun AddNewSlotScreen(
     val resources = LocalContext.current.resources
 
     LaunchedEffect(Unit) {
-        setupTopBar(appTopBarState = appTopBarState, resources = resources, isNewSlot = isNewSlot)
+        setupTopBar(appTopBarState = appTopBarState, resources = resources, isNewSlot = slotRoomId == null)
     }
-    RoomEditBlock(viewModel = hiltViewModel(), scaffoldState = scaffoldState, navController = navController)
+    RoomEditBlock(slotRoomId = slotRoomId, viewModel = hiltViewModel(), scaffoldState = scaffoldState, navController = navController)
 
-//    Scaffold(
-//        scaffoldState = scaffoldState,
-//        snackbarHost = { scaffoldState.snackbarHostState },
-//        modifier = Modifier.fillMaxSize(),
-//        backgroundColor = MainBackground
-//
-//    ) {
-//        Column(modifier = Modifier.fillMaxSize()) {
-//            RoomEditBlock(viewModel = hiltViewModel(), scaffoldState = scaffoldState, navController = navController)
-//
-//        }
-//    }
 }
 
 private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources: Resources, isNewSlot: Boolean) {
@@ -70,6 +58,7 @@ private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources:
 
 @Composable
 fun RoomEditBlock(
+    slotRoomId: String?,
     viewModel: AddNewSlotViewModelImpl,
     scaffoldState: ScaffoldState,
     navController: NavHostController
@@ -77,7 +66,6 @@ fun RoomEditBlock(
     val activity = LocalContext.current as AppCompatActivity
     val viewState = viewModel.addNewSlotState.collectAsState()
     val slotRoom = viewModel.slotRoom.collectAsState()
-    val effectState = viewModel.effect.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val resources = LocalContext.current.resources
 
@@ -142,7 +130,6 @@ fun RoomEditBlock(
                 resources = resources,
                 navController = navController
             )
-            viewModel.resetErrorStatus()
         }
     }
 
@@ -189,7 +176,7 @@ fun RoomEditBlock(
     }
 
     LaunchedEffect(key1 = viewState, block = {
-        viewModel.handleEvent(event = AddNewSlotEvent.EnterScreen)
+        viewModel.handleEvent(event = AddNewSlotEvent.EnterScreen(slotRoomId))
     })
 }
 
@@ -412,5 +399,5 @@ fun AddNewSlotScreen_Preview() {
     }
     val navController = rememberNavController()
     val scaffoldState = rememberScaffoldState()
-    AddNewSlotScreen(isNewSlot = true, appTopBarState = topBarState, navController = navController, scaffoldState = scaffoldState)
+    AddNewSlotScreen(slotRoomId = null, appTopBarState = topBarState, navController = navController, scaffoldState = scaffoldState)
 }

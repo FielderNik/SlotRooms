@@ -4,8 +4,9 @@ import android.util.Log
 import com.testing.slotrooms.model.database.entities.SlotsRoomsUsersEntity
 import com.testing.slotrooms.model.database.entities.Users
 import com.testing.slotrooms.presentation.model.SlotRoom
+import javax.inject.Inject
 
-class SlotsRoomsUsersEntityToSlotRoomMapper : (SlotsRoomsUsersEntity) -> (SlotRoom) {
+class SlotsRoomsUsersEntityToSlotRoomMapper @Inject constructor() : (SlotsRoomsUsersEntity) -> (SlotRoom) {
 
     override fun invoke(entity: SlotsRoomsUsersEntity): SlotRoom {
         Log.d("milk", "entity: $entity")

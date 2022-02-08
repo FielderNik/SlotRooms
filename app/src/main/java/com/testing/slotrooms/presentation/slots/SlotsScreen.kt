@@ -129,7 +129,7 @@ fun SlotRow(slot: SlotRoom, calendar: Calendar, navController: NavController) {
             .padding(vertical = 4.dp)
             .background(backgroundColorSlot)
             .clickable {
-                navController.navigate(Screens.AddNewSlotScreen.passIsNewSlot(false))
+                navController.navigate(Screens.AddNewSlotScreen.passSlotRoomId(slotRoomId = slot.id))
             }
     ) {
         Column(

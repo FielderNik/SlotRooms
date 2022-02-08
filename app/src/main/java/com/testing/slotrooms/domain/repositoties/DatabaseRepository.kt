@@ -17,6 +17,7 @@ interface DatabaseRepository {
     suspend fun getAllSlotsRoomsUsersEntities(): List<SlotsRoomsUsersEntity>
     suspend fun getAllRoomsByName(roomName: String): List<Rooms>
     suspend fun getAllUsersByName(userName: String): List<Users>
+    suspend fun getSlotRoomById(slotId: String): SlotsRoomsUsersEntity
 
 }
 
@@ -55,6 +56,10 @@ class DatabaseRepositoryImpl @Inject constructor(private val slotsDao: SlotsDao)
 
     override suspend fun getAllUsersByName(userName: String): List<Users> {
         return slotsDao.getAllUsersByName(userName = userName)
+    }
+
+    override suspend fun getSlotRoomById(slotId: String): SlotsRoomsUsersEntity {
+        return slotsDao.getSlotRoomById(slotId)
     }
 
 

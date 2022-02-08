@@ -37,7 +37,7 @@ fun MainScreen() {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    navController.navigate(Screens.AddNewSlotScreen.passIsNewSlot(true))
+                    navController.navigate(Screens.AddNewSlotScreen.screenRoute)
                 },
                 backgroundColor = GreenDark,
                 contentColor = Color.White

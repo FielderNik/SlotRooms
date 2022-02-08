@@ -33,13 +33,21 @@ fun NavigationGraph(navController: NavHostController, appTopBarState: MutableSta
         composable(
             route = Screens.AddNewSlotScreen.screenRoute,
             arguments = listOf(
-                navArgument("isNewSlot") {
-                    type = NavType.BoolType
-                })
+//                navArgument("isNewSlot") {
+//                    type = NavType.BoolType
+//                },
+                navArgument("slotRoomId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+
+            )
         ) {
             val isNewSlot = it.arguments?.getBoolean("isNewSlot", true) ?: true
+            val slotRoomId = it.arguments?.getString("slotRoomId", null)
             AddNewSlotScreen(
-                isNewSlot = isNewSlot,
+                slotRoomId = slotRoomId,
                 appTopBarState = appTopBarState,
                 navController = navController,
                 scaffoldState = scaffoldState

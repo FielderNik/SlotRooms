@@ -15,10 +15,13 @@ import com.testing.slotrooms.utils.atStartOfDay
 import com.testing.slotrooms.utils.toSlotsEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
@@ -31,7 +34,6 @@ abstract class AddNewSlotViewModel : ViewModel(), EventHandler<AddNewSlotEvent> 
     abstract val owners: StateFlow<List<Users>>
 
     override fun handleEvent(event: AddNewSlotEvent) {}
-    open suspend fun resetErrorStatus() {}
 }
 
 @HiltViewModel
@@ -40,7 +42,8 @@ class AddNewSlotViewModelImpl @Inject constructor(
     private val addDefaultUsersUseCase: AddDefaultUsersUseCase,
     private val getAllRoomsUseCase: GetAllRoomsUseCase,
     private val getAllUsersUseCase: GetAllUsersUseCase,
-    private val saveNewSlotUseCase: SaveNewSlotUseCase
+    private val saveNewSlotUseCase: SaveNewSlotUseCase,
+    private val getSlotRoomByIdUseCase: GetSlotRoomByIdUseCase,
 ) : ViewModel(), EventHandler<AddNewSlotEvent> {
     private val _rooms: MutableStateFlow<List<Rooms>> = MutableStateFlow(listOf(Rooms(UUID.randomUUID().toString(), "Office")))
     val rooms: StateFlow<List<Rooms>> = _rooms
@@ -55,8 +58,8 @@ class AddNewSlotViewModelImpl @Inject constructor(
     private val _slotRoom: MutableStateFlow<SlotRoom> = MutableStateFlow(SlotRoom(beginDateTime = currentDate, endDateTime = currentDate))
     val slotRoom: StateFlow<SlotRoom> = _slotRoom
 
-    private val _effect: MutableStateFlow<Effects?> = MutableStateFlow(null)
-    val effect: StateFlow<Effects?> = _effect
+    private val effectChannel = Channel<Effects>()
+    val effect = effectChannel.receiveAsFlow()
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -135,7 +138,7 @@ class AddNewSlotViewModelImpl @Inject constructor(
                 val updatedBeginTime = getUpdatedTime(event.beginTimeHour, event.beginTimeMinutes, _slotRoom.value.beginDateTime)
                 viewModelScope.launch {
                     if (updatedBeginTime > _slotRoom.value.endDateTime) {
-                        _effect.emit(AddNewSlotEvent.DateTimeError)
+                        effectChannel.send(AddNewSlotEvent.DateTimeError)
                         _slotRoom.emit(
                             _slotRoom.value.copy(
                                 beginDateTime = updatedBeginTime,
@@ -152,7 +155,7 @@ class AddNewSlotViewModelImpl @Inject constructor(
                 val updatedEndTime = getUpdatedTime(event.endTimeHour, event.endTimeMinutes, _slotRoom.value.endDateTime)
                 viewModelScope.launch {
                     if (updatedEndTime < _slotRoom.value.beginDateTime) {
-                        _effect.emit(AddNewSlotEvent.DateTimeError)
+                        effectChannel.send(AddNewSlotEvent.DateTimeError)
                         _slotRoom.emit(
                             _slotRoom.value.copy(
                                 endDateTime = _slotRoom.value.beginDateTime
@@ -203,7 +206,7 @@ class AddNewSlotViewModelImpl @Inject constructor(
                                 endDateTime = event.beginDateMillis
                             )
                         )
-                        _effect.emit(AddNewSlotEvent.DateTimeError)
+                        effectChannel.send(AddNewSlotEvent.DateTimeError)
                     } else {
                         _slotRoom.emit(
                             _slotRoom.value.copy(
@@ -217,7 +220,7 @@ class AddNewSlotViewModelImpl @Inject constructor(
             is AddNewSlotEvent.SelectedEndDateEvent -> {
                 viewModelScope.launch {
                     if (_slotRoom.value.beginDateTime > event.endDateMillis) {
-                        _effect.emit(AddNewSlotEvent.DateTimeError)
+                        effectChannel.send(AddNewSlotEvent.DateTimeError)
                     } else {
                         _slotRoom.emit(
                             _slotRoom.value.copy(
@@ -264,14 +267,41 @@ class AddNewSlotViewModelImpl @Inject constructor(
                 openDialog(event.dialogType)
             }
             is AddNewSlotEvent.EnterScreen -> {
-                fetchDisplayState(null)
+                if (event.slotRoomId != null) {
+                    fetchEmptyState(event.slotRoomId)
+                } else {
+                    fetchDisplayState(null)
+                }
             }
         }
     }
 
-    suspend fun resetErrorStatus() {
-        _effect.emit(null)
+    private fun fetchEmptyState(slotRoomId: String) {
+        viewModelScope.launch {
+            _addNewSlotState.emit(AddNewSlotState.Loading)
+            withContext(Dispatchers.IO) {
+                getSlotRoomByIdUseCase.run(slotRoomId)
+            }
+                .onSuccess {
+                    _slotRoom.emit(
+                        _slotRoom.value.copy(
+                            id = it.id,
+                            room = it.room,
+                            owner = it.owner,
+                            comments = it.comments,
+                            beginDateTime = it.beginDateTime,
+                            endDateTime = it.beginDateTime
+                        )
+                    )
+                    _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(it))
+                }
+                .onFailure {
+                    effectChannel.send(AddNewSlotEvent.AddNewSlotError("Печалька!")) // TODO (нужен отдельный эффект)
+                    _addNewSlotState.emit(AddNewSlotState.DisplaySlotState(_slotRoom.value))
+                }
+        }
     }
+
 
     private fun saveSlot() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -281,10 +311,10 @@ class AddNewSlotViewModelImpl @Inject constructor(
 
                 saveNewSlotUseCase.run(slotEntity)
                     .onFailure {
-                            _effect.emit(AddNewSlotEvent.SaveSlotError(it))
+                        effectChannel.send(AddNewSlotEvent.SaveSlotError(it))
                     }
                     .onSuccess {
-                            _effect.emit(AddNewSlotEvent.SlotSavedSuccess)
+                        effectChannel.send(AddNewSlotEvent.SlotSavedSuccess)
                     }
             } else {
                 Log.d("milk", "WRONG! slot: ${slotRoom.value}")
@@ -297,11 +327,11 @@ class AddNewSlotViewModelImpl @Inject constructor(
         var isChecked = true
         val slotRoom = _slotRoom.value
         if (slotRoom.room.name.isEmpty()) {
-            _effect.emit(AddNewSlotEvent.RoomEmptyError)
+            effectChannel.send(AddNewSlotEvent.RoomEmptyError)
             isChecked = false
         }
         if (slotRoom.beginDateTime >= slotRoom.endDateTime) {
-            _effect.emit(AddNewSlotEvent.DateTimeError)
+            effectChannel.send(AddNewSlotEvent.DateTimeError)
             isChecked = false
         }
 //        if (slotRoom.owner.name.isEmpty()) {
@@ -358,26 +388,22 @@ class AddNewSlotViewModelImpl @Inject constructor(
     private suspend fun getAllRooms() {
         getAllRoomsUseCase.run(None)
             .onSuccess {
-                viewModelScope.launch {
-                    _rooms.tryEmit(it)
-                    _addNewSlotState.emit(AddNewSlotState.OpenSlotDialog(dialogType = DialogType.ROOM))
-                }
+                _rooms.tryEmit(it)
+                _addNewSlotState.emit(AddNewSlotState.OpenSlotDialog(dialogType = DialogType.ROOM))
             }
             .onFailure {
-                _effect.tryEmit(AddNewSlotEvent.GetRoomsError(it))
+                effectChannel.send(AddNewSlotEvent.GetRoomsError(it))
             }
     }
 
     private suspend fun getAllUsers() {
         getAllUsersUseCase.run(None)
             .onSuccess {
-                viewModelScope.launch {
-                    _owners.tryEmit(it)
-                    _addNewSlotState.emit(AddNewSlotState.OpenSlotDialog(dialogType = DialogType.OWNER))
-                }
+                _owners.tryEmit(it)
+                _addNewSlotState.emit(AddNewSlotState.OpenSlotDialog(dialogType = DialogType.OWNER))
             }
             .onFailure {
-                _effect.tryEmit(AddNewSlotEvent.GetUsersError(it))
+                effectChannel.send(AddNewSlotEvent.GetUsersError(it))
             }
     }
 

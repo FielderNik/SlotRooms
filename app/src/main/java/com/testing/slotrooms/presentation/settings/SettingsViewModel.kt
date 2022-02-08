@@ -25,7 +25,7 @@ class SettingsViewModel @Inject constructor(
     val settingsScreenState: StateFlow<SettingsScreenState> = _settingsScreenState
 
     private val _settingsScreenEffect: MutableStateFlow<SettingsScreenEffect?> = MutableStateFlow(null)
-    val settingsScreenEffect: StateFlow<SettingsScreenEffect?> = _settingsScreenEffect
+    val settingsScreenEffect: StateFlow<SettingsScreenEffect?> = _settingsScreenEffect // TODO переписать на Channel
 
 
     override fun handleEvent(event: SettingsScreenEvent) {
