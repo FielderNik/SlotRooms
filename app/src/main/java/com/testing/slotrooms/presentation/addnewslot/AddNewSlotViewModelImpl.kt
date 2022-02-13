@@ -7,9 +7,9 @@ import com.testing.slotrooms.core.EventHandler
 import com.testing.slotrooms.core.None
 import com.testing.slotrooms.core.onFailure
 import com.testing.slotrooms.core.onSuccess
+import com.testing.slotrooms.data.database.entities.Rooms
+import com.testing.slotrooms.data.database.entities.Users
 import com.testing.slotrooms.domain.usecases.*
-import com.testing.slotrooms.model.database.entities.Rooms
-import com.testing.slotrooms.model.database.entities.Users
 import com.testing.slotrooms.presentation.model.SlotRoom
 import com.testing.slotrooms.utils.atStartOfDay
 import com.testing.slotrooms.utils.toSlotsEntity

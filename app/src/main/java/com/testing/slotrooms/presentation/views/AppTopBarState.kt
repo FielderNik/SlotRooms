@@ -7,6 +7,6 @@ data class AppTopBarState(
     val navigateIcon: @Composable (() -> Unit)? = null,
     val optionIcon: @Composable (() -> Unit)? = null,
     val isShowBack: Boolean = false,
-    val isShowFilter: Boolean = false
-
+    val isShowFilter: Boolean = false,
+    val onFilterClicked: (() -> Unit)? = null,
 )

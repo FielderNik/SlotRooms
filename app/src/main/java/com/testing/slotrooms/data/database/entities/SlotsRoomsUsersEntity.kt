@@ -1,4 +1,4 @@
-package com.testing.slotrooms.model.database.entities
+package com.testing.slotrooms.data.database.entities
 
 import androidx.room.Embedded
 import androidx.room.Relation

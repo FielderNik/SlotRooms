@@ -33,9 +33,7 @@ import com.testing.slotrooms.presentation.views.LoadingSlots
 import com.testing.slotrooms.ui.theme.GreenMain
 import com.testing.slotrooms.ui.theme.MainFont
 import com.testing.slotrooms.ui.theme.YellowMain
-import kotlinx.coroutines.flow.collect
 import java.text.SimpleDateFormat
-import java.util.*
 
 @Composable
 fun SlotsScreen(
@@ -49,7 +47,7 @@ fun SlotsScreen(
     val resources = LocalContext.current.resources
 
     LaunchedEffect(Unit) {
-        setupTopBar(appTopBarState = appTopBarState, resources = resources)
+        setupTopBar(appTopBarState = appTopBarState, resources = resources, navController = navController)
     }
 
     LaunchedEffect(slotsScreenState) {
@@ -68,7 +66,7 @@ fun SlotsScreen(
         }
     }
 
-    Column() {
+    Column {
 
         when (val state = slotsScreenState.value) {
             is SlotsScreenState.SlotsEmptyScreen -> {
@@ -84,38 +82,41 @@ fun SlotsScreen(
             is SlotsScreenState.SlotsSuccess -> {
                 SlotsList(slots = state.slots, navController = navController)
             }
+
+            is SlotsScreenState.FilterOpened -> {
+            }
         }
     }
 
 
 }
 
-private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources: Resources) {
+private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources: Resources, navController: NavHostController) {
     appTopBarState.value = appTopBarState.value.copy(
         title = resources.getString(R.string.title_slots),
         isShowBack = false,
-        isShowFilter = true
+        isShowFilter = true,
+        onFilterClicked = { navController.navigate(Screens.Filter.screenRoute) }
     )
 }
 
 
 @Composable
 fun SlotsList(slots: List<SlotRoom>, navController: NavController) {
-    val calendar = Calendar.getInstance(Locale.ROOT)
     LazyColumn(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         items(slots) { slot ->
-            SlotRow(slot = slot, calendar = calendar, navController = navController)
+            SlotRow(slot = slot, navController = navController)
         }
     }
 }
 
 @Composable
-fun SlotRow(slot: SlotRoom, calendar: Calendar, navController: NavController) {
-    calendar.get(Calendar.HOUR)
-    val timeTextStart = SimpleDateFormat("HH.mm").format(slot.beginDateTime)
-    val timeTextFinish = SimpleDateFormat("HH.mm").format(slot.endDateTime)
+fun SlotRow(slot: SlotRoom, navController: NavController) {
+    val timeFormat = SimpleDateFormat("HH.mm")
+    val timeTextStart = timeFormat.format(slot.beginDateTime)
+    val timeTextFinish = timeFormat.format(slot.endDateTime)
     val timeMeeting = "$timeTextStart - $timeTextFinish"
     val dateMeeting = SimpleDateFormat("dd MMMM").format(slot.endDateTime)
     val backgroundColorSlot = if (slot.owner.name.isNullOrEmpty()) {

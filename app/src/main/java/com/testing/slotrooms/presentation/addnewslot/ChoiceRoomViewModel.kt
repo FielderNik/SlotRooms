@@ -1,17 +1,10 @@
 package com.testing.slotrooms.presentation.addnewslot
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.testing.slotrooms.SlotsApplication
-import com.testing.slotrooms.domain.slots.User
-import com.testing.slotrooms.model.database.SlotsDatabase
-import com.testing.slotrooms.model.database.entities.Rooms
-import com.testing.slotrooms.model.database.entities.Users
-import kotlinx.coroutines.Dispatchers
+import com.testing.slotrooms.data.database.entities.Rooms
+import com.testing.slotrooms.data.database.entities.Users
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.launch
 import java.util.*
 
 class ChoiceRoomViewModel: ViewModel() {

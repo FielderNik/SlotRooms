@@ -1,10 +1,10 @@
 package com.testing.slotrooms.domain.repositoties
 
-import com.testing.slotrooms.model.database.SlotsDao
-import com.testing.slotrooms.model.database.entities.Rooms
-import com.testing.slotrooms.model.database.entities.Slots
-import com.testing.slotrooms.model.database.entities.SlotsRoomsUsersEntity
-import com.testing.slotrooms.model.database.entities.Users
+import com.testing.slotrooms.data.database.SlotsDao
+import com.testing.slotrooms.data.database.entities.Rooms
+import com.testing.slotrooms.data.database.entities.Slots
+import com.testing.slotrooms.data.database.entities.SlotsRoomsUsersEntity
+import com.testing.slotrooms.data.database.entities.Users
 import javax.inject.Inject
 
 interface DatabaseRepository {

@@ -1,13 +1,13 @@
-package com.testing.slotrooms.model.database
+package com.testing.slotrooms.data.database
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
-import com.testing.slotrooms.model.database.entities.Rooms
-import com.testing.slotrooms.model.database.entities.Slots
-import com.testing.slotrooms.model.database.entities.SlotsRoomsUsersEntity
-import com.testing.slotrooms.model.database.entities.Users
+import com.testing.slotrooms.data.database.entities.Rooms
+import com.testing.slotrooms.data.database.entities.Slots
+import com.testing.slotrooms.data.database.entities.SlotsRoomsUsersEntity
+import com.testing.slotrooms.data.database.entities.Users
 
 @Dao
 interface SlotsDao {
@@ -37,7 +37,7 @@ interface SlotsDao {
     suspend fun getAllUsersByName(userName: String) : List<Users>
 
     @Transaction
-    @Query("SELECT * FROM Slots")
+    @Query("SELECT * FROM Slots ORDER BY startTime")
     suspend fun getAllSlotsRoomsUsersEntities() : List<SlotsRoomsUsersEntity>
 
     @Transaction

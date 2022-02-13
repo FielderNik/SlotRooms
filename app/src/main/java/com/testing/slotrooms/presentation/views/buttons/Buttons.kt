@@ -5,7 +5,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -90,19 +89,34 @@ fun ButtonConfirmPreview() {
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
 
-            ButtonCancel(
-                modifier = Modifier
+        Column() {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+
+                ButtonCancel(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
+                    onClick = {})
+                Spacer(modifier = Modifier.padding(16.dp))
+                ButtonSave(modifier = Modifier
                     .weight(1f)
-                    .height(56.dp),
-                onClick = {})
-            Spacer(modifier = Modifier.padding(16.dp))
-            ButtonSave(modifier = Modifier
-                .weight(1f)
-                .height(56.dp)
-                .shadow(20.dp), onClick = {})
+                    .height(56.dp)
+                    .shadow(20.dp), onClick = {})
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                TextButtonConfirm {
+
+                }
+                TextButtonDismiss {
+
+                }
+            }
         }
+
     }
 
 }

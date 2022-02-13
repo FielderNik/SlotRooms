@@ -1,8 +1,8 @@
 package com.testing.slotrooms.domain.mappers
 
 import android.util.Log
-import com.testing.slotrooms.model.database.entities.SlotsRoomsUsersEntity
-import com.testing.slotrooms.model.database.entities.Users
+import com.testing.slotrooms.data.database.entities.SlotsRoomsUsersEntity
+import com.testing.slotrooms.data.database.entities.Users
 import com.testing.slotrooms.presentation.model.SlotRoom
 import javax.inject.Inject
 

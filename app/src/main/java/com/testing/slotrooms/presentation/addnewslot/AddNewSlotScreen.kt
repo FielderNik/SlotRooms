@@ -19,16 +19,14 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.testing.slotrooms.R
-import com.testing.slotrooms.model.database.entities.Rooms
-import com.testing.slotrooms.model.database.entities.Users
+import com.testing.slotrooms.data.database.entities.Rooms
+import com.testing.slotrooms.data.database.entities.Users
 import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.views.AppTopBarState
-import com.testing.slotrooms.presentation.views.buttons.ButtonCancel
-import com.testing.slotrooms.presentation.views.buttons.ButtonSave
+import com.testing.slotrooms.presentation.views.buttons.ButtonBlock
 import com.testing.slotrooms.utils.dateFormat
 import com.testing.slotrooms.utils.timeFormat
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @Composable
@@ -212,31 +210,6 @@ fun ChoiceDialogView(
 
 
 @Composable
-fun ButtonBlock(
-    onSaveClicked: () -> Unit,
-    onCancelClicked: () -> Unit
-) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-
-        ButtonCancel(
-            modifier = Modifier
-                .weight(1f)
-                .height(56.dp),
-            onClick = onCancelClicked
-        )
-        Spacer(modifier = Modifier.weight(0.1f))
-        ButtonSave(
-            modifier = Modifier
-                .weight(1f)
-                .height(56.dp),
-            onClick = onSaveClicked
-        )
-    }
-
-}
-
-
-@Composable
 fun SlotContentView(title: String, content: String, onClick: () -> Unit) {
     //title
     Text(
@@ -252,9 +225,9 @@ fun SlotContentView(title: String, content: String, onClick: () -> Unit) {
             .clickable {
                 onClick.invoke()
             }
-            .padding(top = 12.dp, bottom = 8.dp)
+            .padding(top = 8.dp, bottom = 4.dp)
     )
-    Divider()
+    Divider(modifier = Modifier.padding(bottom = 8.dp))
 }
 
 @Composable

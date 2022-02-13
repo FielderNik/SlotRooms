@@ -6,6 +6,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,6 +19,7 @@ import com.testing.slotrooms.R
 import com.testing.slotrooms.presentation.bottomnavbar.BottomNavigationBar
 import com.testing.slotrooms.presentation.views.AppTopBarState
 import com.testing.slotrooms.ui.theme.GreenDark
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun MainScreen() {
@@ -26,18 +28,29 @@ fun MainScreen() {
         mutableStateOf(AppTopBarState())
     }
     val scaffoldState = rememberScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
+/*    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
+    )*/
+
 
     Scaffold(
         bottomBar = {
             BottomNavigationBar(navController = navController)
-//            BottomAppBar(cutoutShape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50))) {
-//
-//            }
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
                     navController.navigate(Screens.AddNewSlotScreen.screenRoute)
+
+/*                    coroutineScope.launch {
+
+                        if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
+                            bottomSheetScaffoldState.bottomSheetState.expand()
+                        } else {
+                            bottomSheetScaffoldState.bottomSheetState.collapse()
+                        }
+                    }*/
                 },
                 backgroundColor = GreenDark,
                 contentColor = Color.White
@@ -51,23 +64,25 @@ fun MainScreen() {
         floatingActionButtonPosition = FabPosition.Center,
         isFloatingActionButtonDocked = true,
         topBar = {
-            TopBarSlot(appTopBarState = appTopBarState.value, navController = navController)
+            TopBarSlot(appTopBarState = appTopBarState.value, navController = navController, coroutineScope = coroutineScope)
 
         },
-        scaffoldState = scaffoldState
+        scaffoldState = scaffoldState,
+
 
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-
             NavigationGraph(navController = navController, appTopBarState = appTopBarState, scaffoldState = scaffoldState)
         }
+
     }
 
+//    SlotsBottomSheet(bottomSheetScaffoldState = bottomSheetScaffoldState)
 
 }
 
 @Composable
-private fun TopBarSlot(appTopBarState: AppTopBarState, navController: NavController) {
+private fun TopBarSlot(appTopBarState: AppTopBarState, navController: NavController, coroutineScope: CoroutineScope) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -102,7 +117,12 @@ private fun TopBarSlot(appTopBarState: AppTopBarState, navController: NavControl
                 if (appTopBarState.isShowFilter) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_filter_list_24),
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier
+                            .clickable {
+                                    appTopBarState.onFilterClicked?.invoke()
+                            }
+                            .padding(4.dp)
                     )
                 }
             }

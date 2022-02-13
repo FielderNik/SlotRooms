@@ -1,4 +1,4 @@
-package com.testing.slotrooms.presentation.addnewslot
+package com.testing.slotrooms.presentation.views.dialogs
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,34 +12,27 @@ import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.testing.slotrooms.R
 import com.testing.slotrooms.data.database.entities.Rooms
 import com.testing.slotrooms.data.database.entities.Users
+import com.testing.slotrooms.presentation.addnewslot.DialogType
 
 @Composable
-fun <T> ChoiceRoomDialog(
-    viewModel: AddNewSlotViewModelImpl,
+fun <T> ChoiceDialog(
     onConfirmClicked: (responseData: T) -> Unit,
     onDismiss: () -> Unit,
-    dialogType: DialogType
+    dialogType: DialogType,
+    dataList: List<T>
 ) {
     val dialogState = remember {
         mutableStateOf(true)
     }
-    val dataList = if (dialogType == DialogType.ROOM) {
-        viewModel.rooms.collectAsState()
-    } else {
-        viewModel.owners.collectAsState()
-    }
-//    val dataList = viewModel.rooms.collectAsState()
+
     val titleDialog = if (dialogType == DialogType.ROOM) {
         stringResource(id = R.string.title_dialog_choice_room)
     } else {
@@ -61,11 +54,11 @@ fun <T> ChoiceRoomDialog(
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    itemsIndexed(dataList.value) { index, data ->
-                        when (data) {
+                    itemsIndexed(dataList) { index, data ->
+                        when(data) {
                             is Rooms -> {
                                 SlotContentView(
-                                    needDivider = index < dataList.value.lastIndex,
+                                    needDivider = index < dataList.lastIndex,
                                     name = data.name,
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -77,7 +70,7 @@ fun <T> ChoiceRoomDialog(
                             }
                             is Users -> {
                                 SlotContentView(
-                                    needDivider = index < dataList.value.lastIndex,
+                                    needDivider = index < dataList.lastIndex,
                                     name = data.name,
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -93,11 +86,6 @@ fun <T> ChoiceRoomDialog(
                 }
             },
             confirmButton = {
-//                Text(text = "Confirm", modifier = Modifier
-//                    .padding(4.dp)
-//                    .clickable {
-//                        onConfirmClicked.invoke("room")
-//                    })
 
             },
             dismissButton = {
@@ -125,16 +113,4 @@ fun SlotContentView(needDivider: Boolean, name: String, modifier: Modifier) {
     if (needDivider) {
         Divider(modifier = Modifier.padding(top = 4.dp))
     }
-}
-
-
-@Preview
-@Composable
-fun ChoiceRoomDialog_Preview() {
-    ChoiceRoomDialog<Rooms>(
-        viewModel = viewModel<AddNewSlotViewModelImpl>(),
-        onConfirmClicked = { },
-        onDismiss = {},
-        dialogType = DialogType.ROOM
-    )
 }

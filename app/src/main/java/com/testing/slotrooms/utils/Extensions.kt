@@ -1,7 +1,6 @@
 package com.testing.slotrooms.utils
 
-import com.testing.slotrooms.model.database.entities.Slots
-import com.testing.slotrooms.model.database.entities.SlotsRoomsUsersEntity
+import com.testing.slotrooms.data.database.entities.Slots
 import com.testing.slotrooms.presentation.model.SlotRoom
 import java.text.SimpleDateFormat
 import java.util.*

@@ -31,6 +31,21 @@ class SlotsViewModel @Inject constructor(
             is SlotsScreenState.SlotsEmptyScreen -> reduce(currentState, event)
             is SlotsScreenState.SlotsLoading -> reduce(currentState, event)
             is SlotsScreenState.SlotsSuccess -> reduce(currentState, event)
+            is SlotsScreenState.FilterOpened -> reduce(currentState, event)
+        }
+    }
+
+    private fun reduce(currentState: SlotsScreenState.FilterOpened, event: SlotsScreenEvent) {
+        when (event) {
+            is SlotsScreenEvent.SlotFilterEvent -> {
+                when (event) {
+                    SlotsScreenEvent.SlotFilterEvent.CancelFilterEvent -> {
+                        updateSlotScreen()
+                    }
+                    SlotsScreenEvent.SlotFilterEvent.OpenFilterEvent -> {}
+                    SlotsScreenEvent.SlotFilterEvent.SaveFilterEvent -> {}
+                }
+            }
         }
     }
 
@@ -49,6 +64,11 @@ class SlotsViewModel @Inject constructor(
     private fun reduce(currentState: SlotsScreenState.SlotsSuccess, event: SlotsScreenEvent) {
         when (event) {
             SlotsScreenEvent.SlotsEnterScreenEvent -> updateSlotScreen()
+            SlotsScreenEvent.SlotFilterEvent.OpenFilterEvent -> {
+                viewModelScope.launch {
+                    _slotsScreenState.emit(SlotsScreenState.FilterOpened)
+                }
+            }
         }
     }
 

@@ -1,7 +1,7 @@
 package com.testing.slotrooms.presentation.model
 
-import com.testing.slotrooms.model.database.entities.Rooms
-import com.testing.slotrooms.model.database.entities.Users
+import com.testing.slotrooms.data.database.entities.Rooms
+import com.testing.slotrooms.data.database.entities.Users
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*

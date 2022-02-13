@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.testing.slotrooms.presentation.addnewslot.AddNewSlotScreen
+import com.testing.slotrooms.presentation.filter.SlotFilterScreen
 import com.testing.slotrooms.presentation.settings.SettingsScreen
 import com.testing.slotrooms.presentation.slots.SlotsScreen
 import com.testing.slotrooms.presentation.views.AppTopBarState
@@ -33,9 +34,6 @@ fun NavigationGraph(navController: NavHostController, appTopBarState: MutableSta
         composable(
             route = Screens.AddNewSlotScreen.screenRoute,
             arguments = listOf(
-//                navArgument("isNewSlot") {
-//                    type = NavType.BoolType
-//                },
                 navArgument("slotRoomId") {
                     type = NavType.StringType
                     nullable = true
@@ -44,12 +42,20 @@ fun NavigationGraph(navController: NavHostController, appTopBarState: MutableSta
 
             )
         ) {
-            val isNewSlot = it.arguments?.getBoolean("isNewSlot", true) ?: true
             val slotRoomId = it.arguments?.getString("slotRoomId", null)
             AddNewSlotScreen(
                 slotRoomId = slotRoomId,
                 appTopBarState = appTopBarState,
                 navController = navController,
+                scaffoldState = scaffoldState
+            )
+        }
+        composable(
+            route = Screens.Filter.screenRoute
+        ) {
+            SlotFilterScreen(
+                navController = navController,
+                appTopBarState = appTopBarState,
                 scaffoldState = scaffoldState
             )
         }

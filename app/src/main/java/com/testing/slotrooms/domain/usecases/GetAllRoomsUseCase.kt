@@ -3,8 +3,8 @@ package com.testing.slotrooms.domain.usecases
 import com.testing.slotrooms.core.Either
 import com.testing.slotrooms.core.None
 import com.testing.slotrooms.core.UseCase
+import com.testing.slotrooms.data.database.entities.Rooms
 import com.testing.slotrooms.domain.repositoties.DatabaseRepository
-import com.testing.slotrooms.model.database.entities.Rooms
 import javax.inject.Inject
 
 class GetAllRoomsUseCase @Inject constructor(private val databaseRepository: DatabaseRepository) : UseCase<None, List<Rooms>> {

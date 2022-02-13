@@ -16,6 +16,8 @@
     <string name="title_new_room">New room</string>
     <string name="title_new_user">New user</string>
     <string name="title_new_empty_slot">Empty slot</string>
+    <string name="title_slot_filter">SLOT FILTER</string>
+    <string name="title_date">Date</string>
 
     <!--actions-->
     <string name="action_dismiss">Dismiss</string>

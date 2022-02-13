@@ -2,11 +2,8 @@ package com.testing.slotrooms.di
 
 import android.content.Context
 import androidx.room.Room
-import com.testing.slotrooms.domain.repositoties.DatabaseRepository
-import com.testing.slotrooms.domain.repositoties.DatabaseRepositoryImpl
-import com.testing.slotrooms.model.database.SlotsDao
-import com.testing.slotrooms.model.database.SlotsDatabase
-import dagger.Binds
+import com.testing.slotrooms.data.database.SlotsDao
+import com.testing.slotrooms.data.database.SlotsDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
