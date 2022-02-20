@@ -9,8 +9,10 @@ import com.testing.slotrooms.domain.usecases.GetAllSlotsUseCase
 import com.testing.slotrooms.presentation.model.SlotFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -25,6 +27,9 @@ class SlotsViewModel @Inject constructor(
 
     private val _slotsScreenEffect: MutableStateFlow<SlotsScreenEffect?> = MutableStateFlow(null)
     val slotsScreenEffect: StateFlow<SlotsScreenEffect?> = _slotsScreenEffect // TODO переписать на Channel
+
+    private val _effectChannel = Channel<SlotsScreenEffect>()
+    val effectChannel = _effectChannel.receiveAsFlow()
 
     override fun handleEvent(event: SlotsScreenEvent) {
         when (val currentState = _slotsScreenState.value) {

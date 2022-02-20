@@ -45,7 +45,7 @@ fun SlotsScreen(
     filter: SlotFilter? = null,
 ) {
     val slotsScreenState = viewModel.slotsScreenState.collectAsState()
-    val slotsScreenEffect = viewModel.slotsScreenEffect.collectAsState()
+//    val slotsScreenEffect = viewModel.slotsScreenEffect.collectAsState()
     val resources = LocalContext.current.resources
 
     LaunchedEffect(Unit) {
@@ -56,8 +56,8 @@ fun SlotsScreen(
         viewModel.handleEvent(SlotsScreenEvent.SlotsEnterScreenEvent(filter))
     }
 
-    LaunchedEffect(slotsScreenEffect) {
-        viewModel.slotsScreenEffect.collect {
+    LaunchedEffect(Unit) {
+        viewModel.effectChannel.collect {
             handleEffect(
                 scaffoldState = scaffoldState,
                 effect = it,
