@@ -1,9 +1,7 @@
 package com.testing.slotrooms.data.database
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.testing.slotrooms.data.database.entities.Rooms
 import com.testing.slotrooms.data.database.entities.Slots
 import com.testing.slotrooms.data.database.entities.SlotsRoomsUsersEntity
@@ -43,4 +41,8 @@ interface SlotsDao {
     @Transaction
     @Query("SELECT * FROM Slots WHERE id = :slotId")
     suspend fun getSlotRoomById(slotId: String) : SlotsRoomsUsersEntity
+
+    @Transaction
+    @RawQuery
+    suspend fun getSlotsRoomsUsers(query: SupportSQLiteQuery) : List<SlotsRoomsUsersEntity>
 }

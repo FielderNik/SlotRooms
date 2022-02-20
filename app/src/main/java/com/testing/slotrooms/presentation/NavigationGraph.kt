@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.testing.slotrooms.presentation.addnewslot.AddNewSlotScreen
 import com.testing.slotrooms.presentation.filter.SlotFilterScreen
+import com.testing.slotrooms.presentation.model.SlotFilter
 import com.testing.slotrooms.presentation.settings.SettingsScreen
 import com.testing.slotrooms.presentation.slots.SlotsScreen
 import com.testing.slotrooms.presentation.views.AppTopBarState
@@ -17,11 +18,15 @@ import com.testing.slotrooms.presentation.views.AppTopBarState
 @Composable
 fun NavigationGraph(navController: NavHostController, appTopBarState: MutableState<AppTopBarState>, scaffoldState: ScaffoldState) {
     NavHost(navController = navController, startDestination = Screens.Slots.screenRoute) {
-        composable(Screens.Slots.screenRoute) {
+        composable(
+            route = Screens.Slots.screenRoute,
+        ) {
+            val filter = navController.previousBackStackEntry?.arguments?.getParcelable<SlotFilter>("slotFilter")
             SlotsScreen(
                 navController = navController,
                 appTopBarState = appTopBarState,
-                scaffoldState = scaffoldState
+                scaffoldState = scaffoldState,
+                filter = filter
             )
         }
         composable(Screens.Settings.screenRoute) {

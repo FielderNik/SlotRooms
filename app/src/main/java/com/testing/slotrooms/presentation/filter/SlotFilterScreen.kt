@@ -19,6 +19,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.testing.slotrooms.R
 import com.testing.slotrooms.data.database.entities.Rooms
 import com.testing.slotrooms.data.database.entities.Users
+import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.addnewslot.DialogType
 import com.testing.slotrooms.presentation.addnewslot.SlotContentView
 import com.testing.slotrooms.presentation.model.SlotFilter
@@ -53,7 +54,11 @@ fun SlotFilterScreen(
             }
         }
         is SlotFilterState.ResultFilterState -> {
-            SlotFilterContent(filter = state.slotFilter, viewModel = viewModel)
+            SlotFilterContent(
+                filter = state.slotFilter,
+                viewModel = viewModel,
+                navController = navController
+            )
         }
         is SlotFilterState.ChoiceDialogState.RoomDialogOpened -> {
             ChoiceDialog<Rooms>(
@@ -92,7 +97,7 @@ private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources:
 }
 
 @Composable
-private fun SlotFilterContent(filter: SlotFilter?, viewModel: SlotFilterViewModel) {
+private fun SlotFilterContent(filter: SlotFilter?, viewModel: SlotFilterViewModel, navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -102,8 +107,13 @@ private fun SlotFilterContent(filter: SlotFilter?, viewModel: SlotFilterViewMode
             FilterContentBlock(filter = filter, viewModel = viewModel)
             Spacer(modifier = Modifier.height(36.dp))
             ButtonBlock(
-                onSaveClicked = {},
-                onCancelClicked = {}
+                onSaveClicked = {
+                    navController.currentBackStackEntry?.arguments?.putParcelable("slotFilter", filter)
+                    navController.navigate(Screens.Slots.screenRoute)
+                },
+                onCancelClicked = {
+                    navController.navigate(Screens.Slots.screenRoute)
+                }
             )
         }
 

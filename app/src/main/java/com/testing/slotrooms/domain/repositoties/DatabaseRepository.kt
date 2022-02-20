@@ -1,10 +1,13 @@
 package com.testing.slotrooms.domain.repositoties
 
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.testing.slotrooms.data.database.SlotsDao
 import com.testing.slotrooms.data.database.entities.Rooms
 import com.testing.slotrooms.data.database.entities.Slots
 import com.testing.slotrooms.data.database.entities.SlotsRoomsUsersEntity
 import com.testing.slotrooms.data.database.entities.Users
+import com.testing.slotrooms.domain.repositoties.queries.GetSlotsRoomsUsersByFilterSQLQuery
+import com.testing.slotrooms.presentation.model.SlotFilter
 import javax.inject.Inject
 
 interface DatabaseRepository {
@@ -15,6 +18,7 @@ interface DatabaseRepository {
     suspend fun getAllRooms(): List<Rooms>
     suspend fun getSlotsByRoomIdAndTime(slot: Slots): List<Slots>
     suspend fun getAllSlotsRoomsUsersEntities(): List<SlotsRoomsUsersEntity>
+    suspend fun getSlotsRoomsUsers(filter: SlotFilter): List<SlotsRoomsUsersEntity>
     suspend fun getAllRoomsByName(roomName: String): List<Rooms>
     suspend fun getAllUsersByName(userName: String): List<Users>
     suspend fun getSlotRoomById(slotId: String): SlotsRoomsUsersEntity
@@ -60,6 +64,11 @@ class DatabaseRepositoryImpl @Inject constructor(private val slotsDao: SlotsDao)
 
     override suspend fun getSlotRoomById(slotId: String): SlotsRoomsUsersEntity {
         return slotsDao.getSlotRoomById(slotId)
+    }
+
+    override suspend fun getSlotsRoomsUsers(filter: SlotFilter): List<SlotsRoomsUsersEntity> {
+        val query = SimpleSQLiteQuery(GetSlotsRoomsUsersByFilterSQLQuery().invoke(filter))
+        return slotsDao.getSlotsRoomsUsers(query)
     }
 
 

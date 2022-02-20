@@ -1,5 +1,6 @@
 package com.testing.slotrooms.presentation.slots
 
+import com.testing.slotrooms.presentation.model.SlotFilter
 import com.testing.slotrooms.presentation.model.SlotRoom
 
 sealed class SlotsScreenState {
@@ -10,7 +11,7 @@ sealed class SlotsScreenState {
 }
 
 sealed class SlotsScreenEvent {
-    object SlotsEnterScreenEvent : SlotsScreenEvent()
+    class SlotsEnterScreenEvent(val filter: SlotFilter?) : SlotsScreenEvent()
 
     sealed class SlotFilterEvent : SlotsScreenEvent() {
         object OpenFilterEvent : SlotFilterEvent()

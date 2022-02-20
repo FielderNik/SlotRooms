@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.testing.slotrooms.R
 import com.testing.slotrooms.presentation.Screens
+import com.testing.slotrooms.presentation.model.SlotFilter
 import com.testing.slotrooms.presentation.model.SlotRoom
 import com.testing.slotrooms.presentation.views.AppTopBarState
 import com.testing.slotrooms.presentation.views.LoadingSlots
@@ -41,6 +42,7 @@ fun SlotsScreen(
     navController: NavHostController,
     appTopBarState: MutableState<AppTopBarState>,
     scaffoldState: ScaffoldState,
+    filter: SlotFilter? = null,
 ) {
     val slotsScreenState = viewModel.slotsScreenState.collectAsState()
     val slotsScreenEffect = viewModel.slotsScreenEffect.collectAsState()
@@ -51,7 +53,7 @@ fun SlotsScreen(
     }
 
     LaunchedEffect(slotsScreenState) {
-        viewModel.handleEvent(SlotsScreenEvent.SlotsEnterScreenEvent)
+        viewModel.handleEvent(SlotsScreenEvent.SlotsEnterScreenEvent(filter))
     }
 
     LaunchedEffect(slotsScreenEffect) {

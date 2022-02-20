@@ -3,10 +3,10 @@ package com.testing.slotrooms.presentation.slots
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.testing.slotrooms.core.EventHandler
-import com.testing.slotrooms.core.None
 import com.testing.slotrooms.core.onFailure
 import com.testing.slotrooms.core.onSuccess
 import com.testing.slotrooms.domain.usecases.GetAllSlotsUseCase
+import com.testing.slotrooms.presentation.model.SlotFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +40,7 @@ class SlotsViewModel @Inject constructor(
             is SlotsScreenEvent.SlotFilterEvent -> {
                 when (event) {
                     SlotsScreenEvent.SlotFilterEvent.CancelFilterEvent -> {
-                        updateSlotScreen()
+                        updateSlotScreen(null)
                     }
                     SlotsScreenEvent.SlotFilterEvent.OpenFilterEvent -> {}
                     SlotsScreenEvent.SlotFilterEvent.SaveFilterEvent -> {}
@@ -52,7 +52,7 @@ class SlotsViewModel @Inject constructor(
 
     private fun reduce(currentState: SlotsScreenState.SlotsEmptyScreen, event: SlotsScreenEvent) {
         when (event) {
-            SlotsScreenEvent.SlotsEnterScreenEvent -> updateSlotScreen()
+            is SlotsScreenEvent.SlotsEnterScreenEvent -> updateSlotScreen(event.filter)
         }
 
     }
@@ -63,7 +63,7 @@ class SlotsViewModel @Inject constructor(
 
     private fun reduce(currentState: SlotsScreenState.SlotsSuccess, event: SlotsScreenEvent) {
         when (event) {
-            SlotsScreenEvent.SlotsEnterScreenEvent -> updateSlotScreen()
+            is SlotsScreenEvent.SlotsEnterScreenEvent -> updateSlotScreen(event.filter)
             SlotsScreenEvent.SlotFilterEvent.OpenFilterEvent -> {
                 viewModelScope.launch {
                     _slotsScreenState.emit(SlotsScreenState.FilterOpened)
@@ -72,11 +72,11 @@ class SlotsViewModel @Inject constructor(
         }
     }
 
-    private fun updateSlotScreen() {
+    private fun updateSlotScreen(filter: SlotFilter?) {
         viewModelScope.launch {
             _slotsScreenState.emit(SlotsScreenState.SlotsLoading)
             withContext(Dispatchers.IO) {
-                getAllSlotsUseCase.run(None)
+                getAllSlotsUseCase.run(GetAllSlotsUseCase.Params(filter = filter))
             }
                 .onFailure {
                     _slotsScreenEffect.emit(SlotsScreenEffect.ErrorLoading(it))
