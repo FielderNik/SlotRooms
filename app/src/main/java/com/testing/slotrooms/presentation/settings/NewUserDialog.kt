@@ -17,47 +17,56 @@ import com.testing.slotrooms.presentation.views.buttons.TextButtonConfirm
 import com.testing.slotrooms.presentation.views.buttons.TextButtonDismiss
 
 @Composable
-fun NewUserDialog(viewModel: SettingsViewModel) {
+fun NewUserDialog(
+    viewModel: SettingsViewModel,
+    dialogState: MutableState<Boolean>
+) {
     var userName by remember {
         mutableStateOf("")
     }
-    AlertDialog(
-        onDismissRequest = {
-            viewModel.handleEvent(SettingsScreenEvent.OpenDefaultScreen)
-        },
-        title = {
-            Text(
-                text = stringResource(id = R.string.title_new_user),
-                style = MaterialTheme.typography.h3,
-            )
-        },
-        text = {
-            Column {
-                BasicTextField(
-                    value = userName,
-                    onValueChange = { userName = it },
-                    maxLines = 4,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                )
-                Divider(modifier = Modifier.padding(top = 2.dp))
-            }
-        },
-        confirmButton = {
-            TextButtonConfirm(
-                onClick = {
-                    viewModel.handleEvent(SettingsScreenEvent.NewUser.NewUserConfirmed(userName = userName))
-                }
-            )
 
-        },
-        dismissButton = {
-            TextButtonDismiss(
-                onClick = {
-                    viewModel.handleEvent(SettingsScreenEvent.OpenDefaultScreen)
+    if (dialogState.value) {
+        AlertDialog(
+            onDismissRequest = {
+                dialogState.value = false
+            },
+            title = {
+                Text(
+                    text = stringResource(id = R.string.title_new_user),
+                    style = MaterialTheme.typography.h3,
+                )
+            },
+            text = {
+                Column {
+                    BasicTextField(
+                        value = userName,
+                        onValueChange = { userName = it },
+                        maxLines = 4,
+                        textStyle = MaterialTheme.typography.body1,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    )
+                    Divider(modifier = Modifier.padding(top = 2.dp))
                 }
-            )
-        },
-    )
+            },
+            confirmButton = {
+                TextButtonConfirm(
+                    onClick = {
+                        dialogState.value = false
+                        viewModel.saveNewUser(userName)
+                    }
+                )
+
+            },
+            dismissButton = {
+                TextButtonDismiss(
+                    onClick = {
+                        dialogState.value = false
+                    }
+                )
+            },
+        )
+    }
+
 }

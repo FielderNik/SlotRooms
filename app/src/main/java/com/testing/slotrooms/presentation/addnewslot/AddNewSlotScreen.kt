@@ -22,6 +22,7 @@ import com.testing.slotrooms.R
 import com.testing.slotrooms.data.database.entities.Rooms
 import com.testing.slotrooms.data.database.entities.Users
 import com.testing.slotrooms.presentation.Screens
+import com.testing.slotrooms.presentation.model.SlotRoom
 import com.testing.slotrooms.presentation.views.AppTopBarState
 import com.testing.slotrooms.presentation.views.buttons.ButtonBlock
 import com.testing.slotrooms.utils.dateFormat
@@ -34,89 +35,17 @@ fun AddNewSlotScreen(
     slotRoomId: String?,
     appTopBarState: MutableState<AppTopBarState>,
     navController: NavHostController,
-    scaffoldState: ScaffoldState
-) {
-    val resources = LocalContext.current.resources
-
-    LaunchedEffect(Unit) {
-        setupTopBar(appTopBarState = appTopBarState, resources = resources, isNewSlot = slotRoomId == null)
-    }
-    RoomEditBlock(slotRoomId = slotRoomId, viewModel = hiltViewModel(), scaffoldState = scaffoldState, navController = navController)
-
-}
-
-private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources: Resources, isNewSlot: Boolean) {
-    val title = if (isNewSlot) resources.getString(R.string.title_new_slot) else resources.getString(R.string.title_edit_slot)
-    appTopBarState.value = appTopBarState.value.copy(
-        title = title,
-        isShowBack = true
-    )
-}
-
-
-@Composable
-fun RoomEditBlock(
-    slotRoomId: String?,
-    viewModel: AddNewSlotViewModelImpl,
     scaffoldState: ScaffoldState,
-    navController: NavHostController
+    viewModel: AddNewSlotViewModel = hiltViewModel()
 ) {
     val activity = LocalContext.current as AppCompatActivity
     val viewState = viewModel.addNewSlotState.collectAsState()
-    val slotRoom = viewModel.slotRoom.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val resources = LocalContext.current.resources
+    val commentDialogState = remember { mutableStateOf(false) }
 
-    when (val state = viewState.value) {
-        is AddNewSlotState.Loading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
-        is AddNewSlotState.OpenSlotDialog -> {
-            ChoiceDialogView(dialogType = state.dialogType, viewModel = viewModel)
-        }
-        is AddNewSlotState.DisplaySlotState -> {
-        }
-        is AddNewSlotState.OpenDatePicker -> {
-            showDatePicker(
-                activity = activity,
-                updatedDate = {
-                    if (state.isBegin) {
-                        viewModel.handleEvent(AddNewSlotEvent.SelectedBeginDateEvent(it))
-                    } else {
-                        viewModel.handleEvent(AddNewSlotEvent.SelectedEndDateEvent(it))
-                    }
-                },
-                onDismiss = {
-                    viewModel.handleEvent(AddNewSlotEvent.OnDialogDismissClicked)
-                })
-        }
-        is AddNewSlotState.OpenTimePicker -> {
-            showTimePicker(
-                activity = activity,
-                updatedTime = { hour, minute ->
-                    if (state.isBegin) {
-                        viewModel.handleEvent(AddNewSlotEvent.SelectedBeginTimeEvent(hour, minute))
-                    } else {
-                        viewModel.handleEvent(AddNewSlotEvent.SelectedEndTimeEvent(hour, minute))
-                    }
-                },
-                onDismiss = {
-                    viewModel.handleEvent(AddNewSlotEvent.OnDialogDismissClicked)
-                })
-        }
-        is AddNewSlotState.OpenCommentDialog -> {
-            CommentDialog(
-                onConfirmClicked = {
-                    viewModel.handleEvent(AddNewSlotEvent.CommentSubmittedEvent(it))
-                },
-                onDismissClicked = {
-                    viewModel.handleEvent(AddNewSlotEvent.OnDialogDismissClicked)
-                }
-            )
-        }
-
+    LaunchedEffect(Unit) {
+        setupTopBar(appTopBarState = appTopBarState, resources = resources, isNewSlot = slotRoomId == null)
     }
 
     LaunchedEffect(Unit) {
@@ -126,38 +55,88 @@ fun RoomEditBlock(
                 coroutineScope = coroutineScope,
                 effect = it,
                 resources = resources,
-                navController = navController
+                navController = navController,
+                commentDialogState = commentDialogState
             )
         }
     }
 
+    LaunchedEffect(key1 = viewState, block = {
+        viewModel.handleEvent(event = AddNewSlotEvent.EnterScreen(slotRoomId))
+    })
+
+    when (val state = viewState.value) {
+        is AddNewSlotState.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+        is AddNewSlotState.OpenSlotDialog -> {
+            ChoiceDialogView(
+                dialogType = state.dialogType,
+                viewModel = viewModel,
+                dataList = state.dataList
+            )
+        }
+        is AddNewSlotState.DisplaySlotState -> {
+            RoomEditBlock(
+                slotRoomId = slotRoomId,
+                viewModel = viewModel,
+                scaffoldState = scaffoldState,
+                navController = navController,
+                commentDialogState = commentDialogState,
+                slotRoom = state.slotRoom,
+                activity = activity
+            )
+        }
+    }
+
+}
+
+private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources: Resources, isNewSlot: Boolean) {
+    val title = if (isNewSlot) resources.getString(R.string.title_new_slot) else resources.getString(R.string.title_edit_slot)
+    appTopBarState.value = appTopBarState.value.copy(
+        title = title,
+        isShowBack = true,
+        isShowFilter = false
+    )
+}
+
+
+@Composable
+fun RoomEditBlock(
+    slotRoomId: String?,
+    viewModel: AddNewSlotViewModel,
+    scaffoldState: ScaffoldState,
+    navController: NavHostController,
+    commentDialogState: MutableState<Boolean>,
+    slotRoom: SlotRoom,
+    activity: AppCompatActivity
+) {
+
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        SlotContentView(title = stringResource(id = R.string.title_room), content = slotRoom.value.room.name, onClick = {
-            viewModel.handleEvent(AddNewSlotEvent.OnDialogClicked(DialogType.ROOM))
+        SlotContentView(title = stringResource(id = R.string.title_room), content = slotRoom.room.name, onClick = {
+            viewModel.onRoomSelectRequest()
         })
         SlotDateView(
             title = stringResource(id = R.string.title_begin),
-            dateTimeMillis = slotRoom.value.beginDateTime,
-            onDateClick = {
-                viewModel.handleEvent(AddNewSlotEvent.DatePickerClicked(isBegin = true))
-            },
-            onTimeClick = {
-                viewModel.handleEvent(AddNewSlotEvent.TimePickerClicked(isBegin = true))
-            })
+            dateTimeMillis = slotRoom.beginDateTime,
+            isBegin = true,
+            viewModel = viewModel,
+            activity = activity
+        )
         SlotDateView(
             title = stringResource(id = R.string.title_end),
-            dateTimeMillis = slotRoom.value.endDateTime,
-            onDateClick = {
-                viewModel.handleEvent(AddNewSlotEvent.DatePickerClicked(isBegin = false))
-            },
-            onTimeClick = {
-                viewModel.handleEvent(AddNewSlotEvent.TimePickerClicked(isBegin = false))
-            })
-        SlotContentView(title = stringResource(id = R.string.title_owner), content = slotRoom.value.owner.name, onClick = {
-            viewModel.handleEvent(AddNewSlotEvent.OnDialogClicked(DialogType.OWNER))
+            dateTimeMillis = slotRoom.endDateTime,
+            isBegin = false,
+            viewModel = viewModel,
+            activity = activity
+        )
+        SlotContentView(title = stringResource(id = R.string.title_owner), content = slotRoom.owner.name, onClick = {
+            viewModel.onUsersSelectRequest()
         })
-        SlotContentView(title = stringResource(id = R.string.title_comment), content = slotRoom.value.comments, onClick = {
-            viewModel.handleEvent(AddNewSlotEvent.CommentClicked)
+        SlotContentView(title = stringResource(id = R.string.title_comment), content = slotRoom.comments, onClick = {
+            viewModel.onRequestComment()
         })
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -170,40 +149,31 @@ fun RoomEditBlock(
                 navController.navigate(Screens.Slots.screenRoute)
             }
         )
-
     }
 
-    LaunchedEffect(key1 = viewState, block = {
-        viewModel.handleEvent(event = AddNewSlotEvent.EnterScreen(slotRoomId))
-    })
+    CommentDialog(
+        commentDialogState = commentDialogState,
+        viewModel = viewModel
+    )
 }
 
 @Composable
-fun ChoiceDialogView(
+fun <T> ChoiceDialogView(
     dialogType: DialogType,
-    viewModel: AddNewSlotViewModelImpl
+    viewModel: AddNewSlotViewModel,
+    dataList: List<T>,
 ) {
     if (dialogType == DialogType.ROOM) {
         ChoiceRoomDialog<Rooms>(
             viewModel = viewModel,
-            onConfirmClicked = {
-                viewModel.handleEvent(AddNewSlotEvent.SelectedRoomEvent(it))
-            },
-            onDismiss = {
-                viewModel.handleEvent(AddNewSlotEvent.OnDialogDismissClicked)
-            },
-            dialogType = dialogType
+            dialogType = dialogType,
+            dataList = dataList as List<Rooms>,
         )
     } else {
         ChoiceRoomDialog<Users>(
             viewModel = viewModel,
-            onConfirmClicked = {
-                viewModel.handleEvent(AddNewSlotEvent.SelectedOwnerEvent(it))
-            },
-            onDismiss = {
-                viewModel.handleEvent(AddNewSlotEvent.OnDialogDismissClicked)
-            },
-            dialogType = dialogType
+            dialogType = dialogType,
+            dataList = dataList as List<Users>,
         )
     }
 }
@@ -234,8 +204,9 @@ fun SlotContentView(title: String, content: String, onClick: () -> Unit) {
 fun SlotDateView(
     title: String,
     dateTimeMillis: Long = 0L,
-    onDateClick: () -> Unit,
-    onTimeClick: () -> Unit
+    isBegin: Boolean,
+    viewModel: AddNewSlotViewModel,
+    activity: AppCompatActivity
 ) {
     //title
     Text(
@@ -249,7 +220,11 @@ fun SlotDateView(
             style = MaterialTheme.typography.h3,
             modifier = Modifier
                 .clickable {
-                    onDateClick.invoke()
+                    showDatePicker(
+                        activity = activity,
+                        isBegin = isBegin,
+                        viewModel = viewModel
+                    )
                 }
                 .padding(top = 12.dp, bottom = 8.dp, end = 16.dp)
         )
@@ -258,7 +233,11 @@ fun SlotDateView(
             style = MaterialTheme.typography.h3,
             modifier = Modifier
                 .clickable {
-                    onTimeClick.invoke()
+                    showTimePicker(
+                        activity = activity,
+                        isBegin = isBegin,
+                        viewModel = viewModel
+                    )
                 }
                 .padding(top = 12.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
         )
@@ -268,27 +247,28 @@ fun SlotDateView(
 
 private fun showDatePicker(
     activity: AppCompatActivity,
-    updatedDate: (Long) -> Unit,
-    onDismiss: () -> Unit
+    isBegin: Boolean,
+    viewModel: AddNewSlotViewModel
 ) {
     val datePicker = MaterialDatePicker.Builder.datePicker().build()
     datePicker.show(activity.supportFragmentManager, datePicker.toString())
     datePicker.addOnPositiveButtonClickListener {
-        updatedDate(it)
+        viewModel.updateDate(isBegin = isBegin, date = it)
+
     }
     datePicker.addOnCancelListener {
-        onDismiss.invoke()
+//        onDismiss.invoke()
     }
     datePicker.addOnNegativeButtonClickListener {
-        onDismiss.invoke()
+//        onDismiss.invoke()
     }
 }
 
 
 private fun showTimePicker(
     activity: AppCompatActivity,
-    updatedTime: (Int, Int) -> Unit,
-    onDismiss: () -> Unit
+    isBegin: Boolean,
+    viewModel: AddNewSlotViewModel
 ) {
     val timePicker = MaterialTimePicker.Builder()
         .setTimeFormat(TimeFormat.CLOCK_24H)
@@ -296,14 +276,15 @@ private fun showTimePicker(
 
     timePicker.show(activity.supportFragmentManager, timePicker.toString())
     timePicker.addOnPositiveButtonClickListener {
-        updatedTime(timePicker.hour, timePicker.minute)
+        viewModel.updateTime(hour = timePicker.hour, minutes = timePicker.minute, isBegin = isBegin)
+//        updatedTime(timePicker.hour, timePicker.minute)
     }
     timePicker.addOnCancelListener {
-        onDismiss.invoke()
+//        onDismiss.invoke()
     }
 
     timePicker.addOnNegativeButtonClickListener {
-        onDismiss.invoke()
+//        onDismiss.invoke()
     }
 
 }
@@ -314,7 +295,8 @@ private fun handleEffect(
     coroutineScope: CoroutineScope,
     effect: Effects?,
     resources: Resources,
-    navController: NavHostController
+    navController: NavHostController,
+    commentDialogState: MutableState<Boolean>
 ) {
     effect?.let { effectEvent ->
         when (effectEvent) {
@@ -358,6 +340,9 @@ private fun handleEffect(
                     scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.notice_slot_saved_success))
                     navController.navigate(Screens.Slots.screenRoute)
                 }
+            }
+            is AddNewSlotEvent.OpenCommentDialog -> {
+                commentDialogState.value = true
             }
         }
     }

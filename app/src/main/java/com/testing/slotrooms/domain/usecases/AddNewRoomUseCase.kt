@@ -8,10 +8,13 @@ import com.testing.slotrooms.domain.repositoties.DatabaseRepository
 import java.util.*
 import javax.inject.Inject
 
-class AddNewRoomUseCase @Inject constructor(private val databaseRepository: DatabaseRepository) : UseCase<String, Boolean> {
+class AddNewRoomUseCase @Inject constructor(
+    private val databaseRepository: DatabaseRepository
+) : UseCase<String, Boolean> {
+
     override suspend fun run(params: String): Either<Exception, Boolean> {
         return try {
-            val rooms = databaseRepository.getAllRoomsByName(params.trim())
+            val rooms = databaseRepository.getAllRoomsByName(roomName = params.trim())
             if (rooms.isEmpty()) {
                 val newRoom = Rooms(id = UUID.randomUUID().toString(), name = params)
                 databaseRepository.insertRoom(newRoom)

@@ -1,9 +1,8 @@
 package com.testing.slotrooms.presentation.settings
 
+
 sealed class SettingsScreenState {
     object DefaultState : SettingsScreenState()
-    object NewRoomDialogOpen : SettingsScreenState()
-    object NewUserDialogOpen : SettingsScreenState()
     object Loading : SettingsScreenState()
 
 }
@@ -23,16 +22,19 @@ sealed class SettingsScreenEvent {
     }
 }
 
-sealed class SettingsScreenEffect(val exception: Exception? = null) {
+sealed class SettingsScreenEffect {
 
-    sealed class SettingsScreenError(exception: Exception? = null) : SettingsScreenEffect(exception) {
-        class NewRoomError(ex: Exception) : SettingsScreenError(exception = ex)
-        class NewUserError(ex: Exception) : SettingsScreenError(exception = ex)
+    sealed class SettingsScreenError(val exception: Exception? = null) : SettingsScreenEffect() {
+        class NewRoomError(ex: Exception) : SettingsScreenError()
+        class NewUserError(ex: Exception) : SettingsScreenError()
     }
 
     sealed class SettingsScreenSuccess() : SettingsScreenEffect() {
         object NewRoomSaveSuccess : SettingsScreenSuccess()
         object NewUserSaveSuccess : SettingsScreenSuccess()
     }
+
+    object OpenUserDialog : SettingsScreenEffect()
+    object OpenRoomDialog : SettingsScreenEffect()
 
 }

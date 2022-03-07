@@ -12,7 +12,6 @@ import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -26,20 +25,14 @@ import com.testing.slotrooms.data.database.entities.Users
 
 @Composable
 fun <T> ChoiceRoomDialog(
-    viewModel: AddNewSlotViewModelImpl,
-    onConfirmClicked: (responseData: T) -> Unit,
-    onDismiss: () -> Unit,
-    dialogType: DialogType
+    viewModel: AddNewSlotViewModel,
+    dialogType: DialogType,
+    dataList: List<T>,
 ) {
     val dialogState = remember {
         mutableStateOf(true)
     }
-    val dataList = if (dialogType == DialogType.ROOM) {
-        viewModel.rooms.collectAsState()
-    } else {
-        viewModel.owners.collectAsState()
-    }
-//    val dataList = viewModel.rooms.collectAsState()
+
     val titleDialog = if (dialogType == DialogType.ROOM) {
         stringResource(id = R.string.title_dialog_choice_room)
     } else {
@@ -49,7 +42,7 @@ fun <T> ChoiceRoomDialog(
         AlertDialog(
             onDismissRequest = {
                 dialogState.value = false
-                onDismiss.invoke()
+                viewModel.updateDisplayState()
             },
             title = {
                 Text(
@@ -61,28 +54,28 @@ fun <T> ChoiceRoomDialog(
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    itemsIndexed(dataList.value) { index, data ->
+                    itemsIndexed(dataList) { index, data ->
                         when (data) {
                             is Rooms -> {
                                 SlotContentView(
-                                    needDivider = index < dataList.value.lastIndex,
+                                    needDivider = index < dataList.lastIndex,
                                     name = data.name,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            onConfirmClicked.invoke(data as T)
+                                            viewModel.updateRoom(data as Rooms)
                                             dialogState.value = false
                                         }
                                 )
                             }
                             is Users -> {
                                 SlotContentView(
-                                    needDivider = index < dataList.value.lastIndex,
+                                    needDivider = index < dataList.lastIndex,
                                     name = data.name,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            onConfirmClicked.invoke(data as T)
+                                            viewModel.updateUser(data as Users)
                                             dialogState.value = false
                                         }
                                 )
@@ -107,7 +100,7 @@ fun <T> ChoiceRoomDialog(
                         .padding(16.dp)
                         .clickable {
                             dialogState.value = false
-                            onDismiss.invoke()
+                            viewModel.updateDisplayState()
                         })
             },
         )
@@ -132,9 +125,9 @@ fun SlotContentView(needDivider: Boolean, name: String, modifier: Modifier) {
 @Composable
 fun ChoiceRoomDialog_Preview() {
     ChoiceRoomDialog<Rooms>(
-        viewModel = viewModel<AddNewSlotViewModelImpl>(),
-        onConfirmClicked = { },
-        onDismiss = {},
-        dialogType = DialogType.ROOM
+        viewModel = viewModel<AddNewSlotViewModel>(),
+        dialogType = DialogType.ROOM,
+        dataList = listOf()
+
     )
 }

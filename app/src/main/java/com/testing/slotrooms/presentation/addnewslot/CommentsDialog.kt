@@ -13,36 +13,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.testing.slotrooms.R
 import com.testing.slotrooms.presentation.views.buttons.TextButtonConfirm
 import com.testing.slotrooms.presentation.views.buttons.TextButtonDismiss
-import com.testing.slotrooms.R
 
 @Composable
 fun CommentDialog(
-    onConfirmClicked: (comment: String) -> Unit,
-    onDismissClicked: () -> Unit
+    commentDialogState: MutableState<Boolean>,
+    viewModel: AddNewSlotViewModel
 ) {
-    val dialogState = remember {
-        mutableStateOf(true)
-    }
+
     var comment by remember {
         mutableStateOf("")
     }
 
-    if (dialogState.value) {
+    if (commentDialogState.value) {
         AlertDialog(
             onDismissRequest = {
-                dialogState.value = false
+                commentDialogState.value = false
             },
             confirmButton = {
+
                 TextButtonConfirm {
-                    onConfirmClicked.invoke(comment)
+                    commentDialogState.value = false
+                    viewModel.updateComment(comment)
                 }
             },
             dismissButton = {
                 TextButtonDismiss {
-                    dialogState.value = false
-                    onDismissClicked.invoke()
+                    commentDialogState.value = false
                 }
             },
             title = {
@@ -54,7 +54,9 @@ fun CommentDialog(
                         value = comment,
                         onValueChange = { comment = it },
                         maxLines = 4,
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
                     )
                     Divider(modifier = Modifier.padding(top = 2.dp))
                 }
@@ -81,7 +83,9 @@ fun CommentEditField(comment: MutableState<String>) {
 @Composable
 fun CommentDialogPreview() {
     CommentDialog(
-        onConfirmClicked = {},
-        onDismissClicked = {}
+        commentDialogState = remember {
+            mutableStateOf(true)
+        },
+        viewModel = hiltViewModel()
     )
 }

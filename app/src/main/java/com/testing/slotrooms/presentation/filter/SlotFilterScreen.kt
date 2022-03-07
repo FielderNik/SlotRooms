@@ -80,7 +80,7 @@ fun SlotFilterScreen(
                 onConfirmClicked = {
                     viewModel.handleEvent(SlotFilterEvent.UserDialogEvent.UserDialogConfirmed(it))
                 },
-                dialogType = DialogType.OWNER,
+                dialogType = DialogType.USERS,
                 dataList = state.users
             )
         }

@@ -5,10 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,7 +21,6 @@ import com.testing.slotrooms.ui.theme.GreenMain
 import com.testing.slotrooms.ui.theme.GreyIcon
 import com.testing.slotrooms.ui.theme.MainBlue
 import com.testing.slotrooms.ui.theme.YellowMain
-import kotlinx.coroutines.flow.collect
 
 
 @Composable
@@ -36,6 +32,9 @@ fun SettingsScreen(
 ) {
     val resources = LocalContext.current.resources
     val settingsScreenState = viewModel.settingsScreenState.collectAsState()
+    val userDialogState = remember { mutableStateOf(false) }
+    val roomDialogState = remember { mutableStateOf(false) }
+
 
     LaunchedEffect(Unit) {
         setupTopBar(appTopBarState = appTopBarState, resources = resources)
@@ -52,9 +51,10 @@ fun SettingsScreen(
                 scaffoldState = scaffoldState,
                 effect = it,
                 resources = resources,
-                navController = navController
+                navController = navController,
+                userDialogState = userDialogState,
+                roomDialogState = roomDialogState
             )
-            viewModel.resetErrorStatus()
         }
     }
 
@@ -62,14 +62,19 @@ fun SettingsScreen(
         is SettingsScreenState.DefaultState -> {
             SettingsScreenContent(viewModel = viewModel)
         }
-        is SettingsScreenState.NewUserDialogOpen -> {
-            NewUserDialog(viewModel = viewModel)
-        }
-        is SettingsScreenState.NewRoomDialogOpen -> {
-            NewRoomDialog(viewModel = viewModel)
-        }
-
     }
+
+
+    NewUserDialog(
+        viewModel = viewModel,
+        dialogState = userDialogState
+    )
+
+    NewRoomDialog(
+        viewModel = viewModel,
+        dialogState = roomDialogState
+    )
+
 
 }
 
@@ -231,9 +236,11 @@ private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources:
 
 private suspend fun handleEffect(
     scaffoldState: ScaffoldState,
-    effect: SettingsScreenEffect?,
+    effect: SettingsScreenEffect,
     resources: Resources,
-    navController: NavHostController
+    navController: NavHostController,
+    userDialogState: MutableState<Boolean>,
+    roomDialogState: MutableState<Boolean>
 ) {
     when (effect) {
         is SettingsScreenEffect.SettingsScreenError -> {
@@ -242,12 +249,18 @@ private suspend fun handleEffect(
         is SettingsScreenEffect.SettingsScreenSuccess -> {
             handleSuccessEffect(scaffoldState = scaffoldState, effect = effect, resources = resources)
         }
+        SettingsScreenEffect.OpenUserDialog -> {
+            userDialogState.value = true
+        }
+        SettingsScreenEffect.OpenRoomDialog -> {
+            roomDialogState.value = true
+        }
     }
 }
 
 private suspend fun handleSuccessEffect(
     scaffoldState: ScaffoldState,
-    effect: SettingsScreenEffect.SettingsScreenSuccess?,
+    effect: SettingsScreenEffect.SettingsScreenSuccess,
     resources: Resources,
 ) {
     when (effect) {
@@ -263,7 +276,7 @@ private suspend fun handleSuccessEffect(
 
 private suspend fun handleErrorEffect(
     scaffoldState: ScaffoldState,
-    effect: SettingsScreenEffect.SettingsScreenError?,
+    effect: SettingsScreenEffect.SettingsScreenError,
     resources: Resources,
 ) {
     when (effect) {
