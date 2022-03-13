@@ -24,6 +24,7 @@
     <string name="action_confirm">Confirm</string>
     <string name="action_save">Save</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_reset">Reset</string>
 
     <!--errors-->
     <string name="error_slot_date_time">Begin time must be early end time</string>

@@ -5,11 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.testing.slotrooms.core.EventHandler
 import com.testing.slotrooms.core.onFailure
 import com.testing.slotrooms.core.onSuccess
+import com.testing.slotrooms.domain.usecases.DeleteSlotUseCase
 import com.testing.slotrooms.domain.usecases.GetAllSlotsUseCase
 import com.testing.slotrooms.presentation.model.SlotFilter
+import com.testing.slotrooms.presentation.model.SlotRoom
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -20,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SlotsViewModel @Inject constructor(
     private val getAllSlotsUseCase: GetAllSlotsUseCase,
+    private val deleteSlotUseCase: DeleteSlotUseCase,
 ) : ViewModel(), EventHandler<SlotsScreenEvent> {
 
     private val _slotsScreenState: MutableStateFlow<SlotsScreenState> = MutableStateFlow(SlotsScreenState.SlotsEmptyScreen)
@@ -80,6 +84,7 @@ class SlotsViewModel @Inject constructor(
     private fun updateSlotScreen(filter: SlotFilter?) {
         viewModelScope.launch {
             _slotsScreenState.emit(SlotsScreenState.SlotsLoading)
+            delay(2000)
             withContext(Dispatchers.IO) {
                 getAllSlotsUseCase.run(GetAllSlotsUseCase.Params(filter = filter))
             }
@@ -91,6 +96,22 @@ class SlotsViewModel @Inject constructor(
                     _slotsScreenState.emit(SlotsScreenState.SlotsSuccess(it))
                 }
         }
+    }
+
+    fun deleteSlot(slot: SlotRoom, filter: SlotFilter?) {
+        viewModelScope.launch {
+            _slotsScreenState.emit(SlotsScreenState.SlotsLoading)
+            withContext(Dispatchers.IO) {
+                deleteSlotUseCase.run(slot)
+            }
+                .onSuccess {
+                    updateSlotScreen(filter)
+                }
+                .onFailure {
+                    _slotsScreenEffect.emit(SlotsScreenEffect.ErrorLoading(it))
+                }
+        }
+
     }
 
     suspend fun resetErrorStatus() {

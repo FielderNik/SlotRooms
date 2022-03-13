@@ -1,6 +1,7 @@
 package com.testing.slotrooms.presentation.model
 
 import com.testing.slotrooms.data.database.entities.Rooms
+import com.testing.slotrooms.data.database.entities.Slots
 import com.testing.slotrooms.data.database.entities.Users
 import java.time.LocalDate
 import java.time.ZoneId
@@ -21,3 +22,12 @@ data class SlotRoom(
         }
     }
 }
+
+fun SlotRoom.toSlot() = Slots(
+    id = this.id,
+    startTime = this.beginDateTime,
+    endTime = this.endDateTime,
+    roomId = this.room.id,
+    ownerId = this.owner.id,
+    comment = this.comments
+)

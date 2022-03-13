@@ -61,8 +61,9 @@ fun ButtonSave(
 
 @Composable
 fun ButtonCancel(
+    modifier: Modifier = Modifier,
+    text: String? = null,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
     Button(
         onClick = onClick,
@@ -76,7 +77,7 @@ fun ButtonCancel(
         )
     ) {
         Text(
-            text = stringResource(id = R.string.action_cancel),
+            text = text ?: stringResource(id = R.string.action_cancel),
             style = MaterialTheme.typography.button,
         )
 

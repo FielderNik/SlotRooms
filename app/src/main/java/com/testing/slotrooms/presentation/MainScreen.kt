@@ -2,6 +2,7 @@ package com.testing.slotrooms.presentation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -9,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -21,6 +23,7 @@ import com.testing.slotrooms.presentation.views.AppTopBarState
 import com.testing.slotrooms.ui.theme.GreenDark
 import kotlinx.coroutines.CoroutineScope
 
+@ExperimentalMaterialApi
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
@@ -29,10 +32,6 @@ fun MainScreen() {
     }
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
-/*    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
-    )*/
-
 
     Scaffold(
         bottomBar = {
@@ -42,15 +41,6 @@ fun MainScreen() {
             FloatingActionButton(
                 onClick = {
                     navController.navigate(Screens.AddNewSlotScreen.screenRoute)
-
-/*                    coroutineScope.launch {
-
-                        if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
-                            bottomSheetScaffoldState.bottomSheetState.expand()
-                        } else {
-                            bottomSheetScaffoldState.bottomSheetState.collapse()
-                        }
-                    }*/
                 },
                 backgroundColor = GreenDark,
                 contentColor = Color.White
@@ -70,14 +60,12 @@ fun MainScreen() {
         scaffoldState = scaffoldState,
 
 
-    ) { innerPadding ->
+        ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             NavigationGraph(navController = navController, appTopBarState = appTopBarState, scaffoldState = scaffoldState)
         }
 
     }
-
-//    SlotsBottomSheet(bottomSheetScaffoldState = bottomSheetScaffoldState)
 
 }
 
@@ -89,14 +77,15 @@ private fun TopBarSlot(appTopBarState: AppTopBarState, navController: NavControl
             .height(60.dp)
     )
     {
-        Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(32.dp), contentAlignment = Alignment.Center) {
+        Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.BottomStart) {
 
                 if (appTopBarState.isShowBack) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
                         contentDescription = null,
                         modifier = Modifier
+                            .clip(CircleShape)
                             .clickable {
                                 navController.navigateUp()
                             }
@@ -112,15 +101,16 @@ private fun TopBarSlot(appTopBarState: AppTopBarState, navController: NavControl
                 textAlign = TextAlign.Center
             )
 
-            Box(modifier = Modifier.size(32.dp), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.BottomEnd) {
 
                 if (appTopBarState.isShowFilter) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_filter_list_24),
                         contentDescription = null,
                         modifier = Modifier
+                            .clip(CircleShape)
                             .clickable {
-                                    appTopBarState.onFilterClicked?.invoke()
+                                appTopBarState.onFilterClicked?.invoke()
                             }
                             .padding(4.dp)
                     )

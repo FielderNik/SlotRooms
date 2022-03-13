@@ -59,4 +59,11 @@ object UseCaseModule {
     ): GetSlotRoomByIdUseCase {
         return GetSlotRoomByIdUseCase(databaseRepository, slotsRoomsUsersEntityToSlotRoomMapper)
     }
+
+    @Provides
+    fun provideDeleteSlotUseCase(
+        databaseRepository: DatabaseRepository
+    ): DeleteSlotUseCase {
+        return DeleteSlotUseCase(databaseRepository)
+    }
 }

@@ -45,4 +45,7 @@ interface SlotsDao {
     @Transaction
     @RawQuery
     suspend fun getSlotsRoomsUsers(query: SupportSQLiteQuery) : List<SlotsRoomsUsersEntity>
+
+    @Delete
+    suspend fun deleteSlot(slot: Slots)
 }

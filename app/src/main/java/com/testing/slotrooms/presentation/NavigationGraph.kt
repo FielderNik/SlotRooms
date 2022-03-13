@@ -1,5 +1,6 @@
 package com.testing.slotrooms.presentation
 
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -15,6 +16,7 @@ import com.testing.slotrooms.presentation.settings.SettingsScreen
 import com.testing.slotrooms.presentation.slots.SlotsScreen
 import com.testing.slotrooms.presentation.views.AppTopBarState
 
+@ExperimentalMaterialApi
 @Composable
 fun NavigationGraph(navController: NavHostController, appTopBarState: MutableState<AppTopBarState>, scaffoldState: ScaffoldState) {
     NavHost(navController = navController, startDestination = Screens.Slots.screenRoute) {

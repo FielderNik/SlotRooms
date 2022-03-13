@@ -113,6 +113,10 @@ private fun SlotFilterContent(filter: SlotFilter?, viewModel: SlotFilterViewMode
                 },
                 onCancelClicked = {
                     navController.navigate(Screens.Slots.screenRoute)
+                },
+                onResetClicked = {
+                    navController.currentBackStackEntry?.arguments?.putParcelable("slotFilter", null)
+                    navController.navigate(Screens.Slots.screenRoute)
                 }
             )
         }
