@@ -2,10 +2,10 @@
     <string name="app_name">SlotRooms</string>
 
     <!--titles-->
-    <string name="title_slots">SLOTS</string>
-    <string name="title_new_slot">NEW SLOT</string>
-    <string name="title_edit_slot">EDIT SLOT</string>
-    <string name="title_settings">SETTINGS</string>
+    <string name="title_slots">Slots</string>
+    <string name="title_new_slot">New slots</string>
+    <string name="title_edit_slot">Edit slot</string>
+    <string name="title_settings">Settings</string>
     <string name="title_dialog_choice_room">Choice room</string>
     <string name="title_dialog_owners">Owners</string>
     <string name="title_begin">Begin</string>

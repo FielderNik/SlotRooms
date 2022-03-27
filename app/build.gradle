@@ -96,4 +96,7 @@ dependencies {
     //Lottie
     def lottie_version = "4.2.2"
     implementation "com.airbnb.android:lottie-compose:$lottie_version"
+
+    //Collapsing toolbar
+    implementation "me.onebone:toolbar-compose:2.3.3"
 }

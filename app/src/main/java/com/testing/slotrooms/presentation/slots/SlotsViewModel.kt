@@ -12,7 +12,6 @@ import com.testing.slotrooms.presentation.model.SlotRoom
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -84,7 +83,6 @@ class SlotsViewModel @Inject constructor(
     private fun updateSlotScreen(filter: SlotFilter?) {
         viewModelScope.launch {
             _slotsScreenState.emit(SlotsScreenState.SlotsLoading)
-            delay(2000)
             withContext(Dispatchers.IO) {
                 getAllSlotsUseCase.run(GetAllSlotsUseCase.Params(filter = filter))
             }

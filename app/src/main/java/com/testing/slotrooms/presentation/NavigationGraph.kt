@@ -18,7 +18,11 @@ import com.testing.slotrooms.presentation.views.AppTopBarState
 
 @ExperimentalMaterialApi
 @Composable
-fun NavigationGraph(navController: NavHostController, appTopBarState: MutableState<AppTopBarState>, scaffoldState: ScaffoldState) {
+fun NavigationGraph(
+    navController: NavHostController,
+    appTopBarState: MutableState<AppTopBarState>,
+    scaffoldState: ScaffoldState
+) {
     NavHost(navController = navController, startDestination = Screens.Slots.screenRoute) {
         composable(
             route = Screens.Slots.screenRoute,
@@ -28,7 +32,7 @@ fun NavigationGraph(navController: NavHostController, appTopBarState: MutableSta
                 navController = navController,
                 appTopBarState = appTopBarState,
                 scaffoldState = scaffoldState,
-                filter = filter
+                filter = filter,
             )
         }
         composable(Screens.Settings.screenRoute) {

@@ -18,3 +18,11 @@ val MainBlue = Color(0xFFB0DAD2)
 
 val GreyIcon = Color(0xFF848484)
 
+val FabBackground = Color(0xFF32C064)
+val PositiveDateChip = Color(0xFF32C064)
+val NegativeDateChip = Color(0xFFE1980B)
+val RoomChipBackground = Color(0xFFEAF0FF)
+val RoomNameTextColor = Color(0xFF396EF8)
+
+val DividerColor = Color(0xB4DADEFF)
+
