@@ -10,10 +10,12 @@ import javax.inject.Inject
 class GetSlotRoomByIdUseCase @Inject constructor(
     private val databaseRepository: DatabaseRepository,
     private val slotsRoomsUsersEntityToSlotRoomMapper: SlotsRoomsUsersEntityToSlotRoomMapper
-    ): UseCase<String, SlotRoom> {
+) : UseCase<String, SlotRoom> {
+
     override suspend fun run(params: String): Either<Exception, SlotRoom> {
         return try {
-            val slotRoom = slotsRoomsUsersEntityToSlotRoomMapper.invoke(databaseRepository.getSlotRoomById(params)) //TODO (если в бд не нашли слота по этому id - обработать отдельно)
+            val slotRoom =
+                slotsRoomsUsersEntityToSlotRoomMapper.invoke(databaseRepository.getSlotRoomById(params)) //TODO (если в бд не нашли слота по этому id - обработать отдельно)
             Either.Right(slotRoom)
         } catch (ex: Exception) {
             ex.printStackTrace()

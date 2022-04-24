@@ -4,9 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Surface
 import com.testing.slotrooms.presentation.MainScreen
-import com.testing.slotrooms.ui.theme.MainBackground
 import com.testing.slotrooms.ui.theme.SlotRoomsTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -17,12 +15,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
             SlotRoomsTheme {
-                Surface(color = MainBackground) {
-                    MainScreen()
-
-                }
+                MainScreen()
             }
         }
     }

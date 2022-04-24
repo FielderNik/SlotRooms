@@ -1,7 +1,10 @@
 package com.testing.slotrooms.utils
 
-import com.testing.slotrooms.data.database.entities.Slots
+import com.testing.slotrooms.data.database.entities.SlotEntity
 import com.testing.slotrooms.presentation.model.SlotRoom
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,11 +22,11 @@ fun Long.timeFormat(template: String = "HH : mm") : String {
     return SimpleDateFormat(template, Locale.getDefault()).format(Date(this))
 }
 
-fun SlotRoom.toSlotsEntity() : Slots {
-    return Slots(
+fun SlotRoom.toSlotsEntity() : SlotEntity {
+    return SlotEntity(
         id = this.id,
-        startTime = this.beginDateTime,
-        endTime = this.endDateTime,
+        startTime = Instant.fromEpochMilliseconds(this.beginDateTime).toLocalDateTime(TimeZone.currentSystemDefault()),
+        endTime = Instant.fromEpochMilliseconds(this.endDateTime).toLocalDateTime(TimeZone.currentSystemDefault()),
         roomId = this.room.id,
         ownerId = this.owner.id,
         comment = this.comments

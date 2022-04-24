@@ -10,21 +10,22 @@ import com.testing.slotrooms.R
 
 @Composable
 fun ButtonBlock(
+    modifier: Modifier = Modifier,
     onSaveClicked: () -> Unit,
     onCancelClicked: () -> Unit,
     onResetClicked: (() -> Unit)? = null,
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
 
-            ButtonCancel(
+            ButtonCancelNew(
                 modifier = Modifier
                     .weight(1f)
                     .height(56.dp),
                 onClick = onCancelClicked
             )
             Spacer(modifier = Modifier.weight(0.1f))
-            ButtonSave(
+            ButtonSaveNew(
                 modifier = Modifier
                     .weight(1f)
                     .height(56.dp),

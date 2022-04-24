@@ -4,16 +4,16 @@ import androidx.room.Embedded
 import androidx.room.Relation
 
 data class SlotsRoomsUsersEntity(
-    @Embedded val slots: Slots,
+    @Embedded val slotEntity: SlotEntity,
     @Relation(
         parentColumn = "roomId",
         entityColumn = "id"
     )
-    val room: Rooms,
+    val room: RoomEntity,
     @Relation(
         parentColumn = "ownerId",
         entityColumn = "id"
     )
-    val owner: Users? = null
+    val owner: UserEntity? = null
 
 )

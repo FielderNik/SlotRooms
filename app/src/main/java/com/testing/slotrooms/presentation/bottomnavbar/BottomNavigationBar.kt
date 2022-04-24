@@ -8,10 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.testing.slotrooms.presentation.Screens
-import com.testing.slotrooms.ui.theme.MainBackground
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
@@ -23,8 +23,9 @@ fun BottomNavigationBar(navController: NavHostController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     BottomNavigation(
-        backgroundColor = MainBackground,
-        contentColor = Color.Black
+        backgroundColor = Color.White,
+        contentColor = Color.Black,
+        elevation = 24.dp
     ) {
 
         items.forEach { item ->

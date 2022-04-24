@@ -14,10 +14,22 @@
     <string name="title_owner">Owner</string>
     <string name="title_comment">Comment</string>
     <string name="title_new_room">New room</string>
+    <string name="title_edit_room">Edit room</string>
     <string name="title_new_user">New user</string>
     <string name="title_new_empty_slot">Empty slot</string>
-    <string name="title_slot_filter">SLOT FILTER</string>
+    <string name="title_slot_filter">Slot filter</string>
     <string name="title_date">Date</string>
+
+    <string name="title_room_name">Room name</string>
+    <string name="title_room_images">Images</string>
+    <string name="title_room_capacity">Capacity</string>
+    <string name="title_room_address">Address</string>
+    <string name="title_room_info">Info</string>
+
+    <string name="placeholder_room_name">Enter room name</string>
+    <string name="placeholder_room_capacity">Enter capacity room</string>
+    <string name="placeholder_room_address">Enter room address</string>
+    <string name="placeholder_room_info">Enter room info</string>
 
     <!--actions-->
     <string name="action_dismiss">Dismiss</string>

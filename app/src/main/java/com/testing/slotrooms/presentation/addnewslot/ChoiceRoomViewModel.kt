@@ -1,19 +1,19 @@
 package com.testing.slotrooms.presentation.addnewslot
 
 import androidx.lifecycle.ViewModel
-import com.testing.slotrooms.data.database.entities.Rooms
-import com.testing.slotrooms.data.database.entities.Users
+import com.testing.slotrooms.data.database.entities.RoomEntity
+import com.testing.slotrooms.data.database.entities.UserEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.*
 
 class ChoiceRoomViewModel: ViewModel() {
 
-    private val _rooms: MutableStateFlow<List<Rooms>> = MutableStateFlow(listOf(Rooms(UUID.randomUUID().toString(), "Office")))
-    val rooms: StateFlow<List<Rooms>> = _rooms
+    private val _roomEntity: MutableStateFlow<List<RoomEntity>> = MutableStateFlow(listOf(RoomEntity(UUID.randomUUID().toString(), "Office", image = "", capacity = 8)))
+    val roomEntity: StateFlow<List<RoomEntity>> = _roomEntity
 
-    private val _owners: MutableStateFlow<List<Users>> = MutableStateFlow(listOf(Users(UUID.randomUUID().toString(), "Ivanov Ivan")))
-    val owners: StateFlow<List<Users>> = _owners
+    private val _owners: MutableStateFlow<List<UserEntity>> = MutableStateFlow(listOf(UserEntity(UUID.randomUUID().toString(), "Ivanov Ivan")))
+    val owners: StateFlow<List<UserEntity>> = _owners
 
     val defaultRooms = listOf("Office", "Cabinet", "Java room", "Angular room", "Office", "Cabinet", "Java room")
     val defaultOwners = listOf("Ivan Popov", "Pavel Ivanov", "Alexandr Petrov", "Petr Alexandrov", "Anna Ishman", "Igor Lapshov", "Alexey Borovikov")

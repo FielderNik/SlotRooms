@@ -1,13 +1,20 @@
 package com.testing.slotrooms.presentation.slots
 
 import android.content.res.Resources
-import androidx.compose.foundation.layout.*
+import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -19,8 +26,12 @@ import com.testing.slotrooms.R
 import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.model.SlotFilter
 import com.testing.slotrooms.presentation.model.SlotRoom
+import com.testing.slotrooms.presentation.views.AppScreenState
 import com.testing.slotrooms.presentation.views.AppTopBarState
-import com.testing.slotrooms.presentation.views.LoadingSlots
+import com.testing.slotrooms.presentation.views.LoadingView
+import com.testing.slotrooms.ui.theme.LocalScreenState
+import com.testing.slotrooms.ui.theme.LocalSlotFilter
+import com.testing.slotrooms.ui.theme.LocalTopBarState
 
 
 @ExperimentalMaterialApi
@@ -28,20 +39,28 @@ import com.testing.slotrooms.presentation.views.LoadingSlots
 fun SlotsScreen(
     viewModel: SlotsViewModel = hiltViewModel(),
     navController: NavHostController,
-    appTopBarState: MutableState<AppTopBarState>,
     scaffoldState: ScaffoldState,
-    filter: SlotFilter? = null,
 ) {
     val slotsScreenState = viewModel.slotsScreenState.collectAsState()
-//    val slotsScreenEffect = viewModel.slotsScreenEffect.collectAsState()
     val resources = LocalContext.current.resources
+    val appScreenState = LocalScreenState.current
+    val topBarState = LocalTopBarState.current
+    val localSlotFilter = LocalSlotFilter.current
+
+    Log.d("milk", "SlotsScreen launch")
 
     LaunchedEffect(Unit) {
-        setupTopBar(appTopBarState = appTopBarState, resources = resources, navController = navController)
+        setupTopBar(
+            appTopBarState = topBarState,
+            resources = resources,
+            navController = navController,
+        )
+        setupAppScreenState(appScreenState)
+        localSlotFilter?.onFilterChanged = { viewModel.onFilterCleared(localSlotFilter) }
     }
 
-    LaunchedEffect(slotsScreenState) {
-        viewModel.handleEvent(SlotsScreenEvent.SlotsEnterScreenEvent(filter))
+    LaunchedEffect(Unit) {
+        viewModel.handleEvent(SlotsScreenEvent.SlotsEnterScreenEvent(localSlotFilter))
     }
 
     LaunchedEffect(Unit) {
@@ -52,7 +71,6 @@ fun SlotsScreen(
                 resources = resources,
                 navController = navController
             )
-            viewModel.resetErrorStatus()
         }
     }
 
@@ -60,7 +78,7 @@ fun SlotsScreen(
         slotsScreenState = slotsScreenState,
         navController = navController,
         viewModel = viewModel,
-        filter = filter
+        filter = localSlotFilter
     )
 }
 
@@ -81,7 +99,7 @@ fun SlotsScreenContent(
         }
         is SlotsScreenState.SlotsLoading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                LoadingSlots()
+                LoadingView()
             }
         }
         is SlotsScreenState.SlotsSuccess -> {
@@ -97,44 +115,25 @@ fun SlotsScreenContent(
     }
 }
 
-private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources: Resources, navController: NavHostController) {
-    appTopBarState.value = appTopBarState.value.copy(
-        title = resources.getString(R.string.title_slots),
-        isShowBack = false,
-        isShowFilter = true,
+private fun setupTopBar(
+    appTopBarState: AppTopBarState,
+    resources: Resources,
+    navController: NavHostController,
+) {
+    appTopBarState.apply {
+        title = resources.getString(R.string.title_slots)
+        isShowBack = false
+        isShowFilter = true
         onFilterClicked = { navController.navigate(Screens.Filter.screenRoute) }
-    )
+        isShowFilterValues = true
+        isShowFilterReset = false
+    }
+
 }
 
-
-/*@ExperimentalMaterialApi
-@Composable
-private fun SlotsList(
-    slots: List<SlotRoom>,
-    navController: NavController,
-    viewModel: SlotsViewModel,
-    filter: SlotFilter?
-) {
-    Spacer(modifier = Modifier.height(24.dp))
-    Card(
-        modifier = Modifier
-            .padding(top = 8.dp, start = 12.dp, end = 12.dp)
-            .fillMaxSize()
-            .coloredShadow(
-                color = Color.Red
-            )
-        ,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
-    ) {
-        LazyColumn(
-            contentPadding = PaddingValues(vertical = 8.dp),
-        ) {
-            items(slots) { slot ->
-                SlotCardItem(viewModel = viewModel, slot = slot, navController = navController, filter = filter)
-            }
-        }
-    }
-}*/
+private fun setupAppScreenState(appScreenState: AppScreenState) {
+    appScreenState.provideFullScreen()
+}
 
 @ExperimentalMaterialApi
 @Composable
@@ -147,13 +146,18 @@ private fun SlotsList(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-        items(slots) { slot ->
+//        item {
+//            Spacer(modifier = Modifier.height(8.dp))
+//        }
+        items(
+            items = slots,
+            key = { slot ->
+                slot.id
+            }
+        ) { slot ->
 //            SlotCardItem(viewModel = viewModel, slot = slot, navController = navController, filter = filter)
             SlotCard(viewModel = viewModel, slot = slot, navController = navController, filter = filter)
         }

@@ -1,37 +1,21 @@
 package com.testing.slotrooms.presentation.settings
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.testing.slotrooms.core.EventHandler
 import com.testing.slotrooms.core.onFailure
 import com.testing.slotrooms.core.onSuccess
-import com.testing.slotrooms.domain.usecases.AddNewRoomUseCase
-import com.testing.slotrooms.domain.usecases.AddNewUserUseCase
+import com.testing.slotrooms.domain.usecases.CreateRoomUseCase
+import com.testing.slotrooms.domain.usecases.CreateUserUseCase
+import com.testing.slotrooms.presentation.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val addNewRoomUseCase: AddNewRoomUseCase,
-    private val addNewUserUseCase: AddNewUserUseCase
-) : ViewModel(), EventHandler<SettingsScreenEvent> {
-
-    private val _settingsScreenState: MutableStateFlow<SettingsScreenState> = MutableStateFlow(SettingsScreenState.DefaultState)
-    val settingsScreenState: StateFlow<SettingsScreenState> = _settingsScreenState
-
-    private val _settingsScreenEffect = Channel<SettingsScreenEffect>()
-    val settingsScreenEffect = _settingsScreenEffect.receiveAsFlow()
-
+    private val createRoomUseCase: CreateRoomUseCase,
+    private val createUserUseCase: CreateUserUseCase
+) : BaseViewModel<SettingsScreenEvent, SettingsScreenState, SettingsScreenEffect>(SettingsScreenState.DefaultState)/*, EventHandler<SettingsScreenEvent> */ {
 
     override fun handleEvent(event: SettingsScreenEvent) {
-        when (val currentState = _settingsScreenState.value) {
+        when (val currentState = state.value) {
             is SettingsScreenState.DefaultState -> reduce(currentState, event)
             SettingsScreenState.Loading -> {}
         }
@@ -40,60 +24,66 @@ class SettingsViewModel @Inject constructor(
     private fun reduce(currentState: SettingsScreenState.DefaultState, event: SettingsScreenEvent) {
         when (event) {
             is SettingsScreenEvent.NewRoom.NewRoomClicked -> {
-                viewModelScope.launch {
-                    _settingsScreenEffect.send(SettingsScreenEffect.OpenRoomDialog)
+                launchOnMain {
+//                    sendEffect(SettingsScreenEffect.OpenRoomDialog)
+                    sendEffect(SettingsScreenEffect.CreateNewRoom)
                 }
+
             }
             is SettingsScreenEvent.NewUser.NewUserClicked -> {
-                viewModelScope.launch {
-                    _settingsScreenEffect.send(SettingsScreenEffect.OpenUserDialog)
+                launchOnMain {
+                    sendEffect(SettingsScreenEffect.OpenUserDialog)
                 }
             }
             SettingsScreenEvent.EmptySlotClicked -> {
             }
             SettingsScreenEvent.OpenDefaultScreen -> {
+                produceDefaultState()
             }
+            is SettingsScreenEvent.NewRoom.NewRoomConfirmed -> {}
+            is SettingsScreenEvent.NewUser.NewUserConfirmed -> {}
         }
     }
 
 
     private fun produceDefaultState() {
-        viewModelScope.launch {
-            _settingsScreenState.emit(SettingsScreenState.DefaultState)
+        launchOnMain {
+            setState(SettingsScreenState.DefaultState)
         }
     }
 
     fun saveNewRoom(roomName: String) {
-        viewModelScope.launch {
-            _settingsScreenState.emit(SettingsScreenState.Loading)
-            withContext(Dispatchers.IO) {
-                addNewRoomUseCase.run(roomName)
+        launchOnMain {
+            setState(SettingsScreenState.Loading)
+            withIo {
+//                addNewRoomUseCase.run(roomName)
+                createRoomUseCase.run(CreateRoomUseCase.Params(roomName, 0, "", ""))
             }
                 .onSuccess {
-                    _settingsScreenEffect.send(SettingsScreenEffect.SettingsScreenSuccess.NewRoomSaveSuccess)
+                    sendEffect(SettingsScreenEffect.SettingsScreenSuccess.NewRoomSaveSuccess)
                 }
                 .onFailure {
-                    _settingsScreenEffect.send(SettingsScreenEffect.SettingsScreenError.NewRoomError(it))
+                    sendEffect(SettingsScreenEffect.SettingsScreenError.NewRoomError(it))
                 }
-            _settingsScreenState.emit(SettingsScreenState.DefaultState)
-
+            setState(SettingsScreenState.DefaultState)
         }
     }
 
     fun saveNewUser(userName: String) {
-        viewModelScope.launch {
-            _settingsScreenState.emit(SettingsScreenState.Loading)
-            withContext(Dispatchers.IO) {
-                addNewUserUseCase.run(userName)
+        launchOnMain {
+            setState(SettingsScreenState.Loading)
+            withIo {
+                createUserUseCase.run(userName)
             }
                 .onSuccess {
-                    _settingsScreenEffect.send(SettingsScreenEffect.SettingsScreenSuccess.NewUserSaveSuccess)
+                    sendEffect(SettingsScreenEffect.SettingsScreenSuccess.NewUserSaveSuccess)
                 }
                 .onFailure {
-                    _settingsScreenEffect.send(SettingsScreenEffect.SettingsScreenError.NewUserError(it))
+                    sendEffect(SettingsScreenEffect.SettingsScreenError.NewUserError(it))
                 }
-            _settingsScreenState.emit(SettingsScreenState.DefaultState)
+//            produceDefaultState()
 
+            setState(SettingsScreenState.DefaultState)
         }
     }
 

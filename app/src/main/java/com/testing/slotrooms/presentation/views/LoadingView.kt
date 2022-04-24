@@ -9,7 +9,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.testing.slotrooms.R
 
 @Composable
-fun LoadingSlots() {
+fun LoadingView() {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading_green))
 
     LottieAnimation(

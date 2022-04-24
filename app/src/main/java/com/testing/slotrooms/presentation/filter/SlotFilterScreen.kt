@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,16 +16,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.testing.slotrooms.R
-import com.testing.slotrooms.data.database.entities.Rooms
-import com.testing.slotrooms.data.database.entities.Users
+import com.testing.slotrooms.data.database.entities.RoomEntity
+import com.testing.slotrooms.data.database.entities.UserEntity
 import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.addnewslot.DialogType
 import com.testing.slotrooms.presentation.addnewslot.SlotContentView
 import com.testing.slotrooms.presentation.model.SlotFilter
 import com.testing.slotrooms.presentation.views.AppTopBarState
-import com.testing.slotrooms.presentation.views.LoadingSlots
+import com.testing.slotrooms.presentation.views.LoadingView
 import com.testing.slotrooms.presentation.views.buttons.ButtonBlock
 import com.testing.slotrooms.presentation.views.dialogs.ChoiceDialog
+import com.testing.slotrooms.ui.theme.LocalScreenState
+import com.testing.slotrooms.ui.theme.LocalSlotFilter
+import com.testing.slotrooms.ui.theme.LocalTopBarState
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -34,14 +36,23 @@ import java.util.*
 fun SlotFilterScreen(
     viewModel: SlotFilterViewModel = hiltViewModel(),
     navController: NavHostController,
-    appTopBarState: MutableState<AppTopBarState>,
     scaffoldState: ScaffoldState,
 ) {
     val resources = LocalContext.current.resources
     val slotFilterState = viewModel.slotFilterState.collectAsState()
+    val appScreenState = LocalScreenState.current
+    val topBarState = LocalTopBarState.current
+    val localSlotFilter = LocalSlotFilter.current
 
     LaunchedEffect(Unit) {
-        setupTopBar(appTopBarState = appTopBarState, resources = resources, viewModel = viewModel)
+        setupTopBar(
+            appTopBarState = topBarState,
+            resources = resources,
+            viewModel = viewModel,
+            localSlotFilter = localSlotFilter,
+            navController = navController
+        )
+        appScreenState.isShowAddFab = false
     }
 
     when (val state = slotFilterState.value) {
@@ -50,18 +61,19 @@ fun SlotFilterScreen(
         }
         SlotFilterState.FilterLoading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                LoadingSlots()
+                LoadingView()
             }
         }
         is SlotFilterState.ResultFilterState -> {
             SlotFilterContent(
                 filter = state.slotFilter,
                 viewModel = viewModel,
-                navController = navController
+                navController = navController,
+                localSlotFilter = localSlotFilter
             )
         }
         is SlotFilterState.ChoiceDialogState.RoomDialogOpened -> {
-            ChoiceDialog<Rooms>(
+            ChoiceDialog<RoomEntity>(
                 onDismiss = {
                     viewModel.handleEvent(SlotFilterEvent.RoomDialogEvent.RoomDialogCanceled)
                 },
@@ -73,7 +85,7 @@ fun SlotFilterScreen(
             )
         }
         is SlotFilterState.ChoiceDialogState.UserDialogOpened -> {
-            ChoiceDialog<Users>(
+            ChoiceDialog<UserEntity>(
                 onDismiss = {
                     viewModel.handleEvent(SlotFilterEvent.UserDialogEvent.UserDialogCanceled)
                 },
@@ -88,36 +100,56 @@ fun SlotFilterScreen(
 
 }
 
-private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources: Resources, viewModel: SlotFilterViewModel) {
-    appTopBarState.value = appTopBarState.value.copy(
-        title = resources.getString(R.string.title_slot_filter),
-        isShowBack = true,
-        isShowFilter = false,
-    )
+private fun setupTopBar(
+    appTopBarState: AppTopBarState,
+    resources: Resources,
+    viewModel: SlotFilterViewModel,
+    localSlotFilter: SlotFilter?,
+    navController: NavHostController,
+) {
+    appTopBarState.apply {
+        title = resources.getString(R.string.title_slot_filter)
+        isShowBack = true
+        isShowFilter = false
+        isShowFilterValues = false
+        isShowFilterReset = true
+        onFilterResetClicked = {
+            localSlotFilter?.saveDataFromFilter(null)
+            navController.navigate(Screens.Slots.screenRoute)
+        }
+    }
+
 }
 
 @Composable
-private fun SlotFilterContent(filter: SlotFilter?, viewModel: SlotFilterViewModel, navController: NavHostController) {
+private fun SlotFilterContent(
+    filter: SlotFilter?,
+    viewModel: SlotFilterViewModel,
+    navController: NavHostController,
+    localSlotFilter: SlotFilter?
+) {
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(16.dp)
     ) {
         Column {
             FilterContentBlock(filter = filter, viewModel = viewModel)
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.weight(1f))
             ButtonBlock(
                 onSaveClicked = {
-                    navController.currentBackStackEntry?.arguments?.putParcelable("slotFilter", filter)
+                    localSlotFilter?.saveDataFromFilter(filter)
+//                    navController.currentBackStackEntry?.arguments?.putParcelable("slotFilter", filter)
                     navController.navigate(Screens.Slots.screenRoute)
                 },
                 onCancelClicked = {
                     navController.navigate(Screens.Slots.screenRoute)
                 },
-                onResetClicked = {
-                    navController.currentBackStackEntry?.arguments?.putParcelable("slotFilter", null)
-                    navController.navigate(Screens.Slots.screenRoute)
-                }
+//                onResetClicked = {
+//                    localSlotFilter?.saveDataFromFilter(null)
+////                    navController.currentBackStackEntry?.arguments?.putParcelable("slotFilter", null)
+//                    navController.navigate(Screens.Slots.screenRoute)
+//                }
             )
         }
 
@@ -129,8 +161,8 @@ private fun SlotFilterContent(filter: SlotFilter?, viewModel: SlotFilterViewMode
 private fun FilterContentBlock(filter: SlotFilter?, viewModel: SlotFilterViewModel) {
     val beginDate = getBeginDate(filter)
     val endDate = getEndDate(filter)
-    val room = if (filter?.room == null) "" else filter.room.name
-    val owner = if (filter?.owner == null) "" else filter.owner.name
+    val room = if (filter?.room == null) "" else filter.room!!.name
+    val owner = if (filter?.owner == null) "" else filter.owner!!.name
     val activity = LocalContext.current as AppCompatActivity
 
     Box(modifier = Modifier.padding(vertical = 16.dp)) {

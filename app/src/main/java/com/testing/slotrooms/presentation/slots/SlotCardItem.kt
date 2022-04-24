@@ -23,7 +23,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.testing.slotrooms.R
-import com.testing.slotrooms.data.database.entities.Users
+import com.testing.slotrooms.data.database.entities.UserEntity
 import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.model.SlotFilter
 import com.testing.slotrooms.presentation.model.SlotRoom
@@ -79,9 +79,10 @@ fun SlotCardItem(
 
         Text(
             modifier = Modifier.constrainAs(comment) {
-                top.linkTo(timeBlock.bottom, margin = 8.dp)
+                top.linkTo(divider.bottom, margin = 8.dp)
                 linkTo(startGuideline, endCommentGuideline, bias = 0f)
                 width = Dimension.preferredWrapContent
+                bottom.linkTo(bottomBarrier, margin = 16.dp)
 
             },
             text = slot.comments,
@@ -103,6 +104,8 @@ fun SlotCardItem(
             modifier = Modifier.constrainAs(avatar) {
                 top.linkTo(roomChip.bottom, margin = 12.dp)
                 end.linkTo(endGuideline)
+//                bottom.linkTo(parent.bottom, margin = 16.dp)
+                bottom.linkTo(bottomBarrier, margin = 16.dp)
             },
             owner = slot.owner
         )
@@ -110,10 +113,10 @@ fun SlotCardItem(
         Divider(
             modifier = Modifier
                 .constrainAs(divider) {
-                    top.linkTo(bottomBarrier, margin = 12.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(parent.bottom)
+                    top.linkTo(timeBlock.bottom, margin = 8.dp)
+                    linkTo(startGuideline, endCommentGuideline, bias = 0f)
+                    width = Dimension.preferredWrapContent
+                    bottom.linkTo(comment.top)
                 },
             color = DividerColor
         )
@@ -141,7 +144,7 @@ private fun DateChip(modifier: Modifier = Modifier, dateSlot: String, isEmptySlo
             .background(backgroundChip)
             .padding(vertical = 4.dp, horizontal = 8.dp)
     ) {
-        Text(text = dateSlot, color = Color.White)
+        Text(text = dateSlot, color = Color.White, fontSize = 14.sp)
     }
 }
 
@@ -153,7 +156,7 @@ private fun RoomChip(modifier: Modifier = Modifier, roomName: String) {
             .background(RoomChipBackground)
             .padding(vertical = 4.dp, horizontal = 8.dp)
     ) {
-        Text(text = roomName, color = RoomNameTextColor)
+        Text(text = roomName, color = RoomNameTextColor, fontSize = 14.sp)
     }
 }
 
@@ -176,7 +179,7 @@ private fun TimeBlock(modifier: Modifier = Modifier, timeStart: String, timeEnd:
 }
 
 @Composable
-private fun AvatarBlock(modifier: Modifier = Modifier, owner: Users) {
+private fun AvatarBlock(modifier: Modifier = Modifier, owner: UserEntity) {
     Image(
         painter = painterResource(id = R.drawable.avatar1),
         contentDescription = "$owner",
@@ -198,6 +201,6 @@ fun RoomElementsPreview() {
         DateChip(dateSlot = "20 марта", isEmptySlot = false)
         RoomChip(roomName = "Java Room")
         TimeBlock(timeStart = "12:15", timeEnd = "13:00")
-        AvatarBlock(owner = Users("", "Anna"))
+        AvatarBlock(owner = UserEntity("", "Anna"))
     }
 }

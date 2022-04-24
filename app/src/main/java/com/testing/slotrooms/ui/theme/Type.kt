@@ -29,27 +29,27 @@ val Typography = Typography(
         fontSize = 18.sp
     ),
     button = TextStyle(
-        fontFamily = MainFont,
+//        fontFamily = MainFont,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp
     ),
     h1 = TextStyle(
-        fontFamily = MainFont,
+//        fontFamily = MainFont,
         fontWeight = FontWeight.Black,
         fontSize = 36.sp
     ),
     h2 = TextStyle(
-        fontFamily = MainFont,
+//        fontFamily = MainFont,
         fontWeight = FontWeight.Bold,
         fontSize = 24.sp
     ),
     h3 = TextStyle(
-        fontFamily = MainFont,
+//        fontFamily = MainFont,
         fontWeight = FontWeight.Bold,
         fontSize = 18.sp
     ),
     h4 = TextStyle(
-        fontFamily = MainFont,
+//        fontFamily = MainFont,
         fontWeight = FontWeight.Bold,
         fontSize = 12.sp,
         color = GreyFont

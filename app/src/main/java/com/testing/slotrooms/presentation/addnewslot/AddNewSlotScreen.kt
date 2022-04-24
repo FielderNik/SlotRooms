@@ -19,12 +19,15 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.testing.slotrooms.R
-import com.testing.slotrooms.data.database.entities.Rooms
-import com.testing.slotrooms.data.database.entities.Users
+import com.testing.slotrooms.data.database.entities.RoomEntity
+import com.testing.slotrooms.data.database.entities.UserEntity
 import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.model.SlotRoom
+import com.testing.slotrooms.presentation.views.AppScreenState
 import com.testing.slotrooms.presentation.views.AppTopBarState
 import com.testing.slotrooms.presentation.views.buttons.ButtonBlock
+import com.testing.slotrooms.ui.theme.LocalScreenState
+import com.testing.slotrooms.ui.theme.LocalTopBarState
 import com.testing.slotrooms.utils.dateFormat
 import com.testing.slotrooms.utils.timeFormat
 import kotlinx.coroutines.CoroutineScope
@@ -33,19 +36,21 @@ import kotlinx.coroutines.launch
 @Composable
 fun AddNewSlotScreen(
     slotRoomId: String?,
-    appTopBarState: MutableState<AppTopBarState>,
     navController: NavHostController,
     scaffoldState: ScaffoldState,
     viewModel: AddNewSlotViewModel = hiltViewModel()
 ) {
     val activity = LocalContext.current as AppCompatActivity
-    val viewState = viewModel.addNewSlotState.collectAsState()
+    val viewState = viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val resources = LocalContext.current.resources
     val commentDialogState = remember { mutableStateOf(false) }
+    val appScreenState = LocalScreenState.current
+    val topBarState = LocalTopBarState.current
 
     LaunchedEffect(Unit) {
-        setupTopBar(appTopBarState = appTopBarState, resources = resources, isNewSlot = slotRoomId == null)
+        setupTopBar(appTopBarState = topBarState, resources = resources, isNewSlot = slotRoomId == null)
+        setupAppScreenState(appScreenState)
     }
 
     LaunchedEffect(Unit) {
@@ -93,13 +98,18 @@ fun AddNewSlotScreen(
 
 }
 
-private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources: Resources, isNewSlot: Boolean) {
-    val title = if (isNewSlot) resources.getString(R.string.title_new_slot) else resources.getString(R.string.title_edit_slot)
-    appTopBarState.value = appTopBarState.value.copy(
-        title = title,
-        isShowBack = true,
+private fun setupTopBar(appTopBarState: AppTopBarState, resources: Resources, isNewSlot: Boolean) {
+    val screenTitle = if (isNewSlot) resources.getString(R.string.title_new_slot) else resources.getString(R.string.title_edit_slot)
+    appTopBarState.apply {
+        title = screenTitle
+        isShowBack = true
         isShowFilter = false
-    )
+        isShowFilterValues = false
+    }
+}
+
+private fun setupAppScreenState(appScreenState: AppScreenState) {
+    appScreenState.isShowAddFab = false
 }
 
 
@@ -164,16 +174,16 @@ fun <T> ChoiceDialogView(
     dataList: List<T>,
 ) {
     if (dialogType == DialogType.ROOM) {
-        ChoiceRoomDialog<Rooms>(
+        ChoiceRoomDialog<RoomEntity>(
             viewModel = viewModel,
             dialogType = dialogType,
-            dataList = dataList as List<Rooms>,
+            dataList = dataList as List<RoomEntity>,
         )
     } else {
-        ChoiceRoomDialog<Users>(
+        ChoiceRoomDialog<UserEntity>(
             viewModel = viewModel,
             dialogType = dialogType,
-            dataList = dataList as List<Users>,
+            dataList = dataList as List<UserEntity>,
         )
     }
 }
@@ -293,55 +303,55 @@ private fun showTimePicker(
 private fun handleEffect(
     scaffoldState: ScaffoldState,
     coroutineScope: CoroutineScope,
-    effect: Effects?,
+    effect: AddNewSlotEffect?,
     resources: Resources,
     navController: NavHostController,
     commentDialogState: MutableState<Boolean>
 ) {
-    effect?.let { effectEvent ->
+    effect?.also { effectEvent ->
         when (effectEvent) {
-            is AddNewSlotEvent.AddNewSlotError -> {
+            is AddNewSlotEffect.AddNewSlotError -> {
                 coroutineScope.launch {
                     scaffoldState.snackbarHostState.showSnackbar(effectEvent.message)
                 }
             }
-            is AddNewSlotEvent.DateTimeError -> {
+            is AddNewSlotEffect.DateTimeError -> {
                 coroutineScope.launch {
                     scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_slot_date_time))
                 }
             }
-            AddNewSlotEvent.OwnerEmptyError -> {
+            AddNewSlotEffect.OwnerEmptyError -> {
                 coroutineScope.launch {
                     scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_slot_owner_is_empty))
                 }
             }
-            AddNewSlotEvent.RoomEmptyError -> {
+            AddNewSlotEffect.RoomEmptyError -> {
                 coroutineScope.launch {
                     scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_slot_room_is_empty))
                 }
             }
-            is AddNewSlotEvent.GetRoomsError -> {
+            is AddNewSlotEffect.GetRoomsError -> {
                 coroutineScope.launch {
                     scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_get_rooms))
                 }
             }
-            is AddNewSlotEvent.GetUsersError -> {
+            is AddNewSlotEffect.GetUsersError -> {
                 coroutineScope.launch {
                     scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_get_users))
                 }
             }
-            is AddNewSlotEvent.SaveSlotError -> {
+            is AddNewSlotEffect.SaveSlotError -> {
                 coroutineScope.launch {
                     scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.error_slot_is_busy))
                 }
             }
-            is AddNewSlotEvent.SlotSavedSuccess -> {
+            is AddNewSlotEffect.SlotSavedSuccess -> {
                 coroutineScope.launch {
-                    scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.notice_slot_saved_success))
+                    scaffoldState.snackbarHostState.showSnackbar(resources.getString(R.string.notice_slot_saved_success), duration = SnackbarDuration.Short)
                     navController.navigate(Screens.Slots.screenRoute)
                 }
             }
-            is AddNewSlotEvent.OpenCommentDialog -> {
+            is AddNewSlotEffect.OpenCommentDialog -> {
                 commentDialogState.value = true
             }
         }
@@ -352,10 +362,7 @@ private fun handleEffect(
 @Preview
 @Composable
 fun AddNewSlotScreen_Preview() {
-    val topBarState = remember {
-        mutableStateOf(AppTopBarState())
-    }
     val navController = rememberNavController()
     val scaffoldState = rememberScaffoldState()
-    AddNewSlotScreen(slotRoomId = null, appTopBarState = topBarState, navController = navController, scaffoldState = scaffoldState)
+    AddNewSlotScreen(slotRoomId = null, navController = navController, scaffoldState = scaffoldState)
 }

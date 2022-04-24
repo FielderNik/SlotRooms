@@ -20,8 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.testing.slotrooms.R
-import com.testing.slotrooms.data.database.entities.Rooms
-import com.testing.slotrooms.data.database.entities.Users
+import com.testing.slotrooms.data.database.entities.RoomEntity
+import com.testing.slotrooms.data.database.entities.UserEntity
 
 @Composable
 fun <T> ChoiceRoomDialog(
@@ -56,26 +56,26 @@ fun <T> ChoiceRoomDialog(
                 ) {
                     itemsIndexed(dataList) { index, data ->
                         when (data) {
-                            is Rooms -> {
+                            is RoomEntity -> {
                                 SlotContentView(
                                     needDivider = index < dataList.lastIndex,
                                     name = data.name,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            viewModel.updateRoom(data as Rooms)
+                                            viewModel.updateRoom(data as RoomEntity)
                                             dialogState.value = false
                                         }
                                 )
                             }
-                            is Users -> {
+                            is UserEntity -> {
                                 SlotContentView(
                                     needDivider = index < dataList.lastIndex,
                                     name = data.name,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            viewModel.updateUser(data as Users)
+                                            viewModel.updateUser(data as UserEntity)
                                             dialogState.value = false
                                         }
                                 )
@@ -124,7 +124,7 @@ fun SlotContentView(needDivider: Boolean, name: String, modifier: Modifier) {
 @Preview
 @Composable
 fun ChoiceRoomDialog_Preview() {
-    ChoiceRoomDialog<Rooms>(
+    ChoiceRoomDialog<RoomEntity>(
         viewModel = viewModel<AddNewSlotViewModel>(),
         dialogType = DialogType.ROOM,
         dataList = listOf()

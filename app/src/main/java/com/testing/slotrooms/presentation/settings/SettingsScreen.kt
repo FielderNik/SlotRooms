@@ -16,28 +16,29 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.testing.slotrooms.R
+import com.testing.slotrooms.presentation.Screens
+import com.testing.slotrooms.presentation.views.AppScreenState
 import com.testing.slotrooms.presentation.views.AppTopBarState
-import com.testing.slotrooms.ui.theme.GreenMain
-import com.testing.slotrooms.ui.theme.GreyIcon
-import com.testing.slotrooms.ui.theme.MainBlue
-import com.testing.slotrooms.ui.theme.YellowMain
+import com.testing.slotrooms.ui.theme.*
 
 
 @Composable
 fun SettingsScreen(
-    appTopBarState: MutableState<AppTopBarState>,
     viewModel: SettingsViewModel = hiltViewModel(),
     navController: NavHostController,
     scaffoldState: ScaffoldState
 ) {
     val resources = LocalContext.current.resources
-    val settingsScreenState = viewModel.settingsScreenState.collectAsState()
+    val settingsScreenState = viewModel.state.collectAsState()
     val userDialogState = remember { mutableStateOf(false) }
     val roomDialogState = remember { mutableStateOf(false) }
+    val topBarState = LocalTopBarState.current
+    val appScreenState = LocalScreenState.current
 
 
     LaunchedEffect(Unit) {
-        setupTopBar(appTopBarState = appTopBarState, resources = resources)
+        setupTopBar(appTopBarState = topBarState, resources = resources)
+        setupScreenState(appScreenState)
     }
 
     LaunchedEffect(settingsScreenState) {
@@ -46,7 +47,7 @@ fun SettingsScreen(
 
 
     LaunchedEffect(Unit) {
-        viewModel.settingsScreenEffect.collect {
+        viewModel.effect.collect {
             handleEffect(
                 scaffoldState = scaffoldState,
                 effect = it,
@@ -62,6 +63,10 @@ fun SettingsScreen(
         is SettingsScreenState.DefaultState -> {
             SettingsScreenContent(viewModel = viewModel)
         }
+        is SettingsScreenState.Loading -> {
+
+        }
+
     }
 
 
@@ -75,7 +80,10 @@ fun SettingsScreen(
         dialogState = roomDialogState
     )
 
+}
 
+private fun setupScreenState(appScreenState: AppScreenState) {
+    appScreenState.isShowAddFab = false
 }
 
 @Composable
@@ -226,17 +234,19 @@ private fun NewUserItem(viewModel: SettingsViewModel) {
     }
 }
 
-private fun setupTopBar(appTopBarState: MutableState<AppTopBarState>, resources: Resources) {
-    appTopBarState.value = appTopBarState.value.copy(
-        title = resources.getString(R.string.title_settings),
-        isShowBack = false,
+private fun setupTopBar(appTopBarState: AppTopBarState, resources: Resources) {
+    appTopBarState.apply {
+        title = resources.getString(R.string.title_settings)
+        isShowBack = false
         isShowFilter = false
-    )
+        isShowFilterValues = false
+        isShowFilterReset = false
+    }
 }
 
 private suspend fun handleEffect(
     scaffoldState: ScaffoldState,
-    effect: SettingsScreenEffect,
+    effect: SettingsScreenEffect?,
     resources: Resources,
     navController: NavHostController,
     userDialogState: MutableState<Boolean>,
@@ -254,6 +264,12 @@ private suspend fun handleEffect(
         }
         SettingsScreenEffect.OpenRoomDialog -> {
             roomDialogState.value = true
+        }
+        SettingsScreenEffect.CreateNewRoom -> {
+            navController.navigate(Screens.CreateRoom.screenRoute)
+        }
+        null -> {
+
         }
     }
 }

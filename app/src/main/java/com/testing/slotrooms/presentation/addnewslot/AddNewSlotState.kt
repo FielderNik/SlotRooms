@@ -9,28 +9,24 @@ sealed class AddNewSlotState {
 }
 
 sealed interface UI
-sealed interface Effects
 sealed class AddNewSlotEvent {
     data class EnterScreen(val slotRoomId: String? = null) : AddNewSlotEvent(), UI
     data class CommentSubmittedEvent(val comment: String) : AddNewSlotEvent(), UI
     object SaveSlotEvent : AddNewSlotEvent()
     object CancelSlotEvent : AddNewSlotEvent()
 
-
-    data class AddNewSlotError(val message: String) : AddNewSlotEvent(), Effects
-    object DateTimeError : AddNewSlotEvent(), Effects
-    object RoomEmptyError : AddNewSlotEvent(), Effects
-    object OwnerEmptyError : AddNewSlotEvent(), Effects
-    object SlotSavedSuccess : AddNewSlotEvent(), Effects
-    data class GetRoomsError(val exception: Exception) : Effects
-    data class GetUsersError(val exception: Exception) : Effects
-    data class SaveSlotError(val exception: Exception) : Effects
-    data class OpenCommentDialog(val comment: String) : Effects
-
 }
 
 sealed class AddNewSlotEffect {
-    class ShowError(val exception: Exception) : AddNewSlotEffect()
+    data class AddNewSlotError(val message: String) : AddNewSlotEffect()
+    object DateTimeError : AddNewSlotEffect()
+    object RoomEmptyError : AddNewSlotEffect()
+    object OwnerEmptyError : AddNewSlotEffect()
+    object SlotSavedSuccess : AddNewSlotEffect()
+    data class GetRoomsError(val exception: Exception) : AddNewSlotEffect()
+    data class GetUsersError(val exception: Exception) : AddNewSlotEffect()
+    data class SaveSlotError(val exception: Exception) : AddNewSlotEffect()
+    data class OpenCommentDialog(val comment: String) : AddNewSlotEffect()
 
 }
 

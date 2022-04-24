@@ -1,22 +1,22 @@
 package com.testing.slotrooms.domain.mappers
 
-import android.util.Log
 import com.testing.slotrooms.data.database.entities.SlotsRoomsUsersEntity
-import com.testing.slotrooms.data.database.entities.Users
+import com.testing.slotrooms.data.database.entities.UserEntity
 import com.testing.slotrooms.presentation.model.SlotRoom
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import javax.inject.Inject
 
 class SlotsRoomsUsersEntityToSlotRoomMapper @Inject constructor() : (SlotsRoomsUsersEntity) -> (SlotRoom) {
 
     override fun invoke(entity: SlotsRoomsUsersEntity): SlotRoom {
-        Log.d("milk", "entity: $entity")
         return SlotRoom(
-            id = entity.slots.id,
+            id = entity.slotEntity.id,
             room = entity.room,
-            owner = entity.owner ?: Users("", ""),
-            comments = entity.slots.comment,
-            beginDateTime = entity.slots.startTime,
-            endDateTime = entity.slots.endTime
+            owner = entity.owner ?: UserEntity("", "", accountId = "test_account_id"),
+            comments = entity.slotEntity.comment ?: "",
+            beginDateTime = entity.slotEntity.startTime.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds(),
+            endDateTime = entity.slotEntity.endTime.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
         )
     }
 }

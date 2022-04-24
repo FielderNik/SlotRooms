@@ -1,11 +1,11 @@
 package com.testing.slotrooms.presentation.slots
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,12 +24,10 @@ import com.testing.slotrooms.R
 import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.model.SlotFilter
 import com.testing.slotrooms.presentation.model.SlotRoom
-import com.testing.slotrooms.presentation.views.ext.coloredShadow
+import com.testing.slotrooms.ui.theme.DeleteIconColor
 import com.testing.slotrooms.ui.theme.MainFont
 import java.text.SimpleDateFormat
 import kotlin.math.roundToInt
-
-const val CARD_HEIGHT = 130
 
 @ExperimentalMaterialApi
 @Composable
@@ -39,14 +37,13 @@ fun SlotCard(
     navController: NavController,
     filter: SlotFilter?
 ) {
-    val squareSize = 100.dp
+    val squareSize = (-120).dp
     val swipeableState = rememberSwipeableState(initialValue = 0)
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
     val anchors = mapOf(0f to 0, sizePx to 1)
 
-    Card(
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
             .swipeable(
                 state = swipeableState,
                 anchors = anchors,
@@ -56,15 +53,14 @@ fun SlotCard(
                 orientation = Orientation.Horizontal,
                 reverseDirection = false
             )
-            .coloredShadow(Color.Blue),
-        backgroundColor = Color(0xFFFCF0F0),
-        shape = RoundedCornerShape(16.dp)
     ) {
         Box(
             modifier = Modifier
-                .padding(start = 16.dp)
-                .height(100.dp),
-            contentAlignment = Alignment.CenterStart
+                .padding(end = 32.dp)
+                .height(120.dp)
+                .fillMaxWidth()
+            ,
+            contentAlignment = Alignment.CenterEnd
         ) {
             IconButton(
                 onClick = {
@@ -73,25 +69,26 @@ fun SlotCard(
                 modifier = Modifier
                     .size(60.dp)
                     .clip(CircleShape)
-
             ) {
-                Icon(painter = painterResource(R.drawable.ic_delete_outline), contentDescription = null, tint = Color(0xFF610E0E))
+                Icon(
+                    painter = painterResource(R.drawable.ic_delete_outline),
+                    contentDescription = null,
+                    tint = DeleteIconColor
+                )
             }
         }
 
-        Card(
+        Box(
             modifier = Modifier
                 .offset {
                     IntOffset(
                         swipeableState.offset.value.roundToInt(), 0
                     )
                 }
-                .fillMaxWidth()
-                .fillMaxHeight(),
-            shape = RoundedCornerShape(16.dp)
-
+                .background(Color.White)
+            ,
         ) {
-            SlotCardItem(viewModel = viewModel, slot = slot, navController = navController, filter = filter)
+            SlotCardItemNew(slot = slot, navController = navController)
         }
     }
 }

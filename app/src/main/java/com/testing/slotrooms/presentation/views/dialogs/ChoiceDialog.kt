@@ -18,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.testing.slotrooms.R
-import com.testing.slotrooms.data.database.entities.Rooms
-import com.testing.slotrooms.data.database.entities.Users
+import com.testing.slotrooms.data.database.entities.RoomEntity
+import com.testing.slotrooms.data.database.entities.UserEntity
 import com.testing.slotrooms.presentation.addnewslot.DialogType
 
 @Composable
@@ -56,7 +56,7 @@ fun <T> ChoiceDialog(
                 ) {
                     itemsIndexed(dataList) { index, data ->
                         when(data) {
-                            is Rooms -> {
+                            is RoomEntity -> {
                                 SlotContentView(
                                     needDivider = index < dataList.lastIndex,
                                     name = data.name,
@@ -68,7 +68,7 @@ fun <T> ChoiceDialog(
                                         }
                                 )
                             }
-                            is Users -> {
+                            is UserEntity -> {
                                 SlotContentView(
                                     needDivider = index < dataList.lastIndex,
                                     name = data.name,

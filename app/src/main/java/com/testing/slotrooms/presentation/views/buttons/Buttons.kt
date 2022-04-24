@@ -1,15 +1,19 @@
 package com.testing.slotrooms.presentation.views.buttons
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.testing.slotrooms.R
+import com.testing.slotrooms.ui.theme.ButtonBackground
 import com.testing.slotrooms.ui.theme.GreenMain
 import com.testing.slotrooms.ui.theme.RedMain
 
@@ -17,9 +21,7 @@ import com.testing.slotrooms.ui.theme.RedMain
 fun TextButtonConfirm(
     onClick: () -> Unit
 ) {
-    TextButton(onClick = {
-        onClick.invoke()
-    }) {
+    TextButton(onClick = onClick) {
         Text(text = stringResource(id = R.string.action_confirm))
     }
 }
@@ -28,9 +30,7 @@ fun TextButtonConfirm(
 fun TextButtonDismiss(
     onClick: () -> Unit
 ) {
-    TextButton(onClick = {
-        onClick.invoke()
-    }) {
+    TextButton(onClick = onClick) {
         Text(text = stringResource(id = R.string.action_dismiss))
     }
 }
@@ -44,6 +44,30 @@ fun ButtonSave(
         onClick = onClick,
         shape = RectangleShape,
         colors = ButtonDefaults.buttonColors(backgroundColor = GreenMain),
+        modifier = modifier,
+        elevation = ButtonDefaults.elevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp,
+            disabledElevation = 0.dp
+        )
+    ) {
+        Text(
+            text = stringResource(id = R.string.action_save),
+            style = MaterialTheme.typography.button,
+        )
+
+    }
+}
+
+@Composable
+fun ButtonSaveNew(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(backgroundColor = ButtonBackground, contentColor = Color.White),
         modifier = modifier,
         elevation = ButtonDefaults.elevation(
             defaultElevation = 0.dp,
@@ -75,6 +99,32 @@ fun ButtonCancel(
             pressedElevation = 0.dp,
             disabledElevation = 0.dp
         )
+    ) {
+        Text(
+            text = text ?: stringResource(id = R.string.action_cancel),
+            style = MaterialTheme.typography.button,
+        )
+
+    }
+}
+
+@Composable
+fun ButtonCancelNew(
+    modifier: Modifier = Modifier,
+    text: String? = null,
+    onClick: () -> Unit,
+) {
+    Button(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Unspecified, contentColor = RedMain),
+        modifier = modifier,
+        elevation = ButtonDefaults.elevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp,
+            disabledElevation = 0.dp
+        ),
+        border = BorderStroke(width = 2.dp, color = RedMain)
     ) {
         Text(
             text = text ?: stringResource(id = R.string.action_cancel),

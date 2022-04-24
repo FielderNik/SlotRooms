@@ -3,16 +3,18 @@ package com.testing.slotrooms.domain.usecases
 import com.testing.slotrooms.core.Either
 import com.testing.slotrooms.core.None
 import com.testing.slotrooms.core.UseCase
-import com.testing.slotrooms.data.database.entities.Users
-import com.testing.slotrooms.domain.repositoties.DatabaseRepository
+import com.testing.slotrooms.data.database.entities.UserEntity
+import com.testing.slotrooms.domain.repositoties.UsersRepository
 import javax.inject.Inject
 
-class GetAllUsersUseCase @Inject constructor(private val databaseRepository: DatabaseRepository): UseCase<None, List<Users>> {
-    override suspend fun run(params: None): Either<Exception, List<Users>> {
+class GetAllUsersUseCase @Inject constructor(
+    private val usersRepository: UsersRepository
+) : UseCase<None, List<UserEntity>> {
+    override suspend fun run(params: None): Either<Exception, List<UserEntity>> {
         return try {
-            val users = databaseRepository.getAllUsers()
-            Either.Right(users)
+            usersRepository.getAllUsers()
         } catch (ex: Exception) {
+            ex.printStackTrace()
             Either.Left(ex)
         }
     }

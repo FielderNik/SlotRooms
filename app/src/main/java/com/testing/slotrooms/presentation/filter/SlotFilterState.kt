@@ -1,7 +1,7 @@
 package com.testing.slotrooms.presentation.filter
 
-import com.testing.slotrooms.data.database.entities.Rooms
-import com.testing.slotrooms.data.database.entities.Users
+import com.testing.slotrooms.data.database.entities.RoomEntity
+import com.testing.slotrooms.data.database.entities.UserEntity
 import com.testing.slotrooms.presentation.model.SlotFilter
 
 sealed class SlotFilterState {
@@ -10,8 +10,8 @@ sealed class SlotFilterState {
     data class ResultFilterState(val slotFilter: SlotFilter?) : SlotFilterState()
 
     sealed class ChoiceDialogState : SlotFilterState() {
-        class RoomDialogOpened(val rooms: List<Rooms>) : ChoiceDialogState()
-        class UserDialogOpened(val users: List<Users>) : ChoiceDialogState()
+        class RoomDialogOpened(val rooms: List<RoomEntity>) : ChoiceDialogState()
+        class UserDialogOpened(val users: List<UserEntity>) : ChoiceDialogState()
     }
 }
 
@@ -23,12 +23,12 @@ sealed class SlotFilterEvent {
 
     sealed class RoomDialogEvent : SlotFilterEvent() {
         object RoomDialogCanceled : RoomDialogEvent()
-        class RoomDialogConfirmed(val room: Rooms) : RoomDialogEvent()
+        class RoomDialogConfirmed(val room: RoomEntity) : RoomDialogEvent()
     }
 
     sealed class UserDialogEvent : SlotFilterEvent() {
         object UserDialogCanceled : UserDialogEvent()
-        class UserDialogConfirmed(val user: Users) : UserDialogEvent()
+        class UserDialogConfirmed(val user: UserEntity) : UserDialogEvent()
     }
 }
 

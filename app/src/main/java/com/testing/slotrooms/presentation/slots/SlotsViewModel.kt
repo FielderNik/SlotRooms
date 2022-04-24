@@ -1,5 +1,6 @@
 package com.testing.slotrooms.presentation.slots
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.testing.slotrooms.core.EventHandler
@@ -11,10 +12,10 @@ import com.testing.slotrooms.presentation.model.SlotFilter
 import com.testing.slotrooms.presentation.model.SlotRoom
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -28,13 +29,17 @@ class SlotsViewModel @Inject constructor(
     private val _slotsScreenState: MutableStateFlow<SlotsScreenState> = MutableStateFlow(SlotsScreenState.SlotsEmptyScreen)
     val slotsScreenState: StateFlow<SlotsScreenState> = _slotsScreenState
 
-    private val _slotsScreenEffect: MutableStateFlow<SlotsScreenEffect?> = MutableStateFlow(null)
-    val slotsScreenEffect: StateFlow<SlotsScreenEffect?> = _slotsScreenEffect // TODO переписать на Channel
+//    private val _slotsScreenEffect: MutableStateFlow<SlotsScreenEffect?> = MutableStateFlow(null)
+//    val slotsScreenEffect: StateFlow<SlotsScreenEffect?> = _slotsScreenEffect // TODO переписать на Channel
 
-    private val _effectChannel = Channel<SlotsScreenEffect>()
-    val effectChannel = _effectChannel.receiveAsFlow()
+//    private val _effectChannel = Channel<SlotsScreenEffect>()
+//    val effectChannel = _effectChannel.receiveAsFlow()
+
+    private val _effectChanel = MutableSharedFlow<SlotsScreenEffect>()
+    val effectChannel = _effectChanel.asSharedFlow()
 
     override fun handleEvent(event: SlotsScreenEvent) {
+        Log.d("milk", "SlotsViewModel: handleEvent run")
         when (val currentState = _slotsScreenState.value) {
             is SlotsScreenState.SlotsEmptyScreen -> reduce(currentState, event)
             is SlotsScreenState.SlotsLoading -> reduce(currentState, event)
@@ -87,13 +92,17 @@ class SlotsViewModel @Inject constructor(
                 getAllSlotsUseCase.run(GetAllSlotsUseCase.Params(filter = filter))
             }
                 .onFailure {
-                    _slotsScreenEffect.emit(SlotsScreenEffect.ErrorLoading(it))
+                    _effectChanel.emit(SlotsScreenEffect.ErrorLoading(it))
                     it.printStackTrace()
                 }
                 .onSuccess {
                     _slotsScreenState.emit(SlotsScreenState.SlotsSuccess(it))
                 }
         }
+    }
+
+    fun onFilterCleared(filter: SlotFilter?) {
+        updateSlotScreen(filter)
     }
 
     fun deleteSlot(slot: SlotRoom, filter: SlotFilter?) {
@@ -106,14 +115,14 @@ class SlotsViewModel @Inject constructor(
                     updateSlotScreen(filter)
                 }
                 .onFailure {
-                    _slotsScreenEffect.emit(SlotsScreenEffect.ErrorLoading(it))
+                    _effectChanel.emit(SlotsScreenEffect.ErrorLoading(it))
                 }
         }
 
     }
 
-    suspend fun resetErrorStatus() {
-        _slotsScreenEffect.emit(null)
-    }
+//    suspend fun resetErrorStatus() {
+//        _effectChanel.emit(null)
+//    }
 
 }

@@ -1,12 +1,12 @@
 package com.testing.slotrooms.presentation.filter
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.testing.slotrooms.core.None
 import com.testing.slotrooms.core.onFailure
 import com.testing.slotrooms.core.onSuccess
 import com.testing.slotrooms.domain.usecases.GetAllRoomsUseCase
 import com.testing.slotrooms.domain.usecases.GetAllUsersUseCase
-import com.testing.slotrooms.presentation.BaseViewModel
 import com.testing.slotrooms.presentation.model.SlotFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +20,8 @@ import javax.inject.Inject
 class SlotFilterViewModel @Inject constructor(
     private val getAllRoomsUseCase: GetAllRoomsUseCase,
     private val getAllUsersUseCase: GetAllUsersUseCase,
-) : BaseViewModel<SlotFilterEvent>() {
+//) : BaseViewModel<SlotFilterEvent>() {
+) : ViewModel() {
 
     private var slotFilter: SlotFilter = SlotFilter()
 
@@ -28,7 +29,7 @@ class SlotFilterViewModel @Inject constructor(
     val slotFilterState: StateFlow<SlotFilterState> = _slotFilterState
 
 
-    override fun handleEvent(event: SlotFilterEvent) {
+    /*override*/ fun handleEvent(event: SlotFilterEvent) {
         when (val currentState = _slotFilterState.value) {
             is SlotFilterState.EmptyFilterState -> reduce(currentState, event)
             is SlotFilterState.FilterLoading -> reduce(currentState, event)
@@ -46,7 +47,8 @@ class SlotFilterViewModel @Inject constructor(
                         updateResultState()
                     }
                     is SlotFilterEvent.UserDialogEvent.UserDialogConfirmed -> {
-                        slotFilter = slotFilter.copy(owner = event.user)
+//                        slotFilter = slotFilter.copy(owner = event.user)
+                        slotFilter.owner = event.user
                         updateResultState()
                     }
 
@@ -63,7 +65,8 @@ class SlotFilterViewModel @Inject constructor(
                         updateResultState()
                     }
                     is SlotFilterEvent.RoomDialogEvent.RoomDialogConfirmed -> {
-                        slotFilter = slotFilter.copy(room = event.room)
+//                        slotFilter = slotFilter.copy(room = event.room)
+                        slotFilter.room = event.room
                         updateResultState()
                     }
 
@@ -75,7 +78,9 @@ class SlotFilterViewModel @Inject constructor(
     private fun reduce(currentState: SlotFilterState.ResultFilterState, event: SlotFilterEvent) {
         when (event) {
             is SlotFilterEvent.RangeDatePickedEvent -> {
-                slotFilter = slotFilter.copy(beginDate = event.beginDate, endDate = event.endDate)
+//                slotFilter = slotFilter.copy(beginDate = event.beginDate, endDate = event.endDate)
+                slotFilter.beginDate = event.beginDate
+                slotFilter.endDate = event.endDate
                 updateResultState()
             }
             SlotFilterEvent.RangeDateCanceledEvent -> updateResultState()
@@ -129,6 +134,10 @@ class SlotFilterViewModel @Inject constructor(
                     _slotFilterState.emit(SlotFilterState.ChoiceDialogState.UserDialogOpened(it))
                 }
         }
+    }
+
+    fun updateSlotScreen() {
+        getRoomsAndUpdateStates()
     }
 
     private fun updateState(state: SlotFilterState) {

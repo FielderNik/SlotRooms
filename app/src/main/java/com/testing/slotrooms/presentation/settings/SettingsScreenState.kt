@@ -36,5 +36,6 @@ sealed class SettingsScreenEffect {
 
     object OpenUserDialog : SettingsScreenEffect()
     object OpenRoomDialog : SettingsScreenEffect()
+    object CreateNewRoom : SettingsScreenEffect()
 
 }
