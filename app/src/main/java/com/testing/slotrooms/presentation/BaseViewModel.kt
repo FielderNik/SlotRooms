@@ -22,7 +22,7 @@ open class BaseViewModel<Event, State, Effect>(
 
 
     fun sendEvent(event: Event) {
-
+        handleEvent(event)
     }
 
     suspend fun setState(newState: State) {

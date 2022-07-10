@@ -1,37 +1,56 @@
 package com.testing.slotrooms.presentation.splash
 
+import androidx.lifecycle.viewModelScope
 import com.testing.slotrooms.core.None
-import com.testing.slotrooms.domain.usecases.GetAllRoomsUseCase
-import com.testing.slotrooms.domain.usecases.GetAllSlotsUseCase
-import com.testing.slotrooms.domain.usecases.GetAllUsersUseCase
+import com.testing.slotrooms.core.SlotsException
+import com.testing.slotrooms.core.onFailure
+import com.testing.slotrooms.core.onSuccess
+import com.testing.slotrooms.domain.usecases.LoadUsersRoomsSlotsUseCase
 import com.testing.slotrooms.presentation.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    private val getAllUsersUseCase: GetAllUsersUseCase,
-    private val getAllRoomsUseCase: GetAllRoomsUseCase,
-    private val getAllSlotsUseCase: GetAllSlotsUseCase,
-): BaseViewModel<SplashEvent, SplashState, SplashEffect>(SplashState.Loading) {
+    private val loadUsersRoomsSlotsUseCase: LoadUsersRoomsSlotsUseCase,
+) : BaseViewModel<SplashEvent, SplashState, SplashEffect>(SplashState.Loading) {
 
     suspend fun initialization() {
-        loadUsers()
-        loadRooms()
-        loadSlots()
-        setState(SplashState.Completed)
-        sendEffect(SplashEffect.LoadCompleted)
+        viewModelScope.launch {
+            loadUsersRoomsSlots()
+        }
     }
 
-    private suspend fun loadUsers() {
-        getAllUsersUseCase.run(None)
+    override fun handleEvent(event: SplashEvent) {
+        super.handleEvent(event)
     }
 
-    private suspend fun loadRooms() {
-        getAllRoomsUseCase.run(None)
+    private suspend fun loadUsersRoomsSlots() {
+        withContext(Dispatchers.IO) {
+            loadUsersRoomsSlotsUseCase.run(None)
+        }
+            .onFailure {
+                handleException(it)
+            }
+            .onSuccess {
+                setState(SplashState.Completed)
+                sendEffect(SplashEffect.LoadCompleted)
+            }
     }
 
-    private suspend fun loadSlots() {
-        getAllSlotsUseCase.run(GetAllSlotsUseCase.Params(null))
+    private suspend fun handleException(exception: Exception) {
+        when(exception) {
+            is SlotsException.RemoteException.ServerUnavailable -> {
+                setState(SplashState.ServerUnavailable(exception))
+            }
+            else -> {
+                setState(SplashState.Completed)
+                sendEffect(SplashEffect.Failed.UsualFailed(exception))
+            }
+        }
     }
+
 }

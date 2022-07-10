@@ -85,7 +85,7 @@ fun <A, B, C> ((A) -> B).c(f: (B) -> C): (A) -> C = {
  * Right-biased flatMap() FP convention which means that Right is assumed to be the default case
  * to operate on. If it is Left, operations like map, flatMap, ... return the Left value unchanged.
  */
-fun <T, L, R> Either<L, R>.flatMap(fn: (R) -> Either<L, T>): Either<L, T> =
+inline fun <T, L, R> Either<L, R>.flatMap(fn: (R) -> Either<L, T>): Either<L, T> =
         when (this) {
             is Either.Left -> Either.Left(a)
             is Either.Right -> fn(b)

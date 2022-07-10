@@ -11,11 +11,6 @@ class GetAllUsersUseCase @Inject constructor(
     private val usersRepository: UsersRepository
 ) : UseCase<None, List<UserEntity>> {
     override suspend fun run(params: None): Either<Exception, List<UserEntity>> {
-        return try {
-            usersRepository.getAllUsers()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            Either.Left(ex)
-        }
+        return usersRepository.getAllUsers()
     }
 }

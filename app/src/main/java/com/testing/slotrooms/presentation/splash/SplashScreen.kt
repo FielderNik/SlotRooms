@@ -10,6 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieAnimation
@@ -17,8 +18,10 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.testing.slotrooms.R
+import com.testing.slotrooms.core.SlotsException
 import com.testing.slotrooms.presentation.Screens
 import com.testing.slotrooms.presentation.views.AppScreenState
+import com.testing.slotrooms.presentation.views.dialogs.ErrorDialog
 import com.testing.slotrooms.ui.theme.LocalScreenState
 
 @Composable
@@ -43,7 +46,8 @@ fun SplashScreen(
         viewModel.effect.collect {
             handleEffect(
                 effect = it,
-                navController = navController
+                navController = navController,
+                scaffoldState = scaffoldState,
             )
         }
     }
@@ -54,12 +58,16 @@ fun SplashScreen(
 
 @Composable
 private fun SplashScreenContent(state: SplashState, navController: NavHostController) {
+
     when(state) {
         is SplashState.Loading -> {
             LoadingContent()
         }
         is SplashState.Completed -> {
             CompletedContent()
+        }
+        is SplashState.ServerUnavailable -> {
+            ErrorContent(exception = state.exception)
         }
     }
 }
@@ -85,13 +93,59 @@ private fun LoadingContent() {
     )
 }
 
+@Composable
+private fun ErrorContent(exception: Exception) {
+    val title = getErrorTitle(exception)
+    val message = getErrorMessage(exception = exception)
+
+    ErrorDialog(
+        title = title,
+        message = message,
+        onPositiveButtonClicked = {
+
+        },
+        onNegativeButtonClicked = {
+
+        },
+    )
+}
+
 private suspend fun handleEffect(
     effect: SplashEffect?,
-    navController: NavHostController
+    navController: NavHostController,
+    scaffoldState: ScaffoldState,
 ) {
     when(effect) {
         is SplashEffect.LoadCompleted -> {
             navController.navigate(Screens.Slots.screenRoute)
+        }
+        is SplashEffect.Failed -> {
+            scaffoldState.snackbarHostState.showSnackbar(effect.exception.message ?: "Error")
+        }
+        null -> Unit
+    }
+}
+
+@Composable
+private fun getErrorTitle(exception: Exception, ) : String {
+    return when(exception) {
+        is SlotsException.RemoteException.ServerUnavailable -> {
+            stringResource(id = R.string.title_server_unavailable)
+        }
+        else -> {
+            "Error"
+        }
+    }
+}
+
+@Composable
+private fun getErrorMessage(exception: Exception, ) : String {
+    return when(exception) {
+        is SlotsException.RemoteException.ServerUnavailable -> {
+            stringResource(id = R.string.title_continue_offline)
+        }
+        else -> {
+            exception.message ?: "Error"
         }
     }
 }

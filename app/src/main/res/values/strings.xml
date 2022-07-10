@@ -26,6 +26,9 @@
     <string name="title_room_address">Address</string>
     <string name="title_room_info">Info</string>
 
+    <string name="title_server_unavailable">Server unavailable</string>
+    <string name="title_continue_offline">Do you want to continue offline?</string>
+
     <string name="placeholder_room_name">Enter room name</string>
     <string name="placeholder_room_capacity">Enter capacity room</string>
     <string name="placeholder_room_address">Enter room address</string>

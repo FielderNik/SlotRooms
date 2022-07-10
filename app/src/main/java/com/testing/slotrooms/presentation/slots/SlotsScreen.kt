@@ -1,7 +1,6 @@
 package com.testing.slotrooms.presentation.slots
 
 import android.content.res.Resources
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,8 +45,6 @@ fun SlotsScreen(
     val appScreenState = LocalScreenState.current
     val topBarState = LocalTopBarState.current
     val localSlotFilter = LocalSlotFilter.current
-
-    Log.d("milk", "SlotsScreen launch")
 
     LaunchedEffect(Unit) {
         setupTopBar(

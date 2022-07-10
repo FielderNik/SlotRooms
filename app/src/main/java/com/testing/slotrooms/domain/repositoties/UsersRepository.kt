@@ -2,10 +2,10 @@ package com.testing.slotrooms.domain.repositoties
 
 import com.testing.slotrooms.core.Either
 import com.testing.slotrooms.core.None
-import com.testing.slotrooms.core.SlotsException
-import com.testing.slotrooms.data.database.SlotsDao
+import com.testing.slotrooms.core.flatMap
 import com.testing.slotrooms.data.database.entities.UserEntity
-import com.testing.slotrooms.data.services.SlotService
+import com.testing.slotrooms.data.datasource.LocalDatasource
+import com.testing.slotrooms.data.datasource.RemoteDatasource
 import javax.inject.Inject
 
 interface UsersRepository {
@@ -19,23 +19,13 @@ interface UsersRepository {
 }
 
 class UsersRepositoryImpl @Inject constructor(
-    private val dao: SlotsDao,
-    private val service: SlotService
+    private val remoteDatasource: RemoteDatasource,
+    private val localDatasource: LocalDatasource
 ) : UsersRepository {
 
     override suspend fun createUser(user: UserEntity): Either<Exception, UserEntity?> {
-        return try {
-            val response = service.createUser(user)
-            if (response.isSuccessful) {
-                response.body()?.let { responseUser ->
-                    cashedUser(responseUser)
-                    Either.Right(responseUser)
-                } ?: Either.Left(SlotsException.RemoteException.ResponseException())
-            } else {
-                Either.Left(SlotsException.RemoteException.ResponseException(response.message()))
-            }
-        } catch (ex: Exception) {
-            Either.Left(SlotsException.RemoteException.ResponseException(ex.message))
+        return remoteDatasource.createUser(user).flatMap { responseUser ->
+            localDatasource.createUser(responseUser)
         }
     }
 
@@ -48,41 +38,19 @@ class UsersRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getAllUsers(): Either<Exception, List<UserEntity>> {
-        return try {
-            val response = service.getAllUsers()
-            if (response.isSuccessful) {
-                cashedAllUsers(response.body())
-                val users = dao.getAllUsers()
-                Either.Right(users)
-            } else {
-                Either.Left(SlotsException.RemoteException.ResponseException(response.message()))
+        return remoteDatasource.getAllUsers().flatMap { users ->
+            localDatasource.saveUsers(users).flatMap {
+                localDatasource.getAllUsers()
             }
-        } catch (ex: Exception) {
-            Either.Left(SlotsException.RemoteException.ResponseException(ex.message))
         }
     }
 
     override suspend fun getUserById(userId: String): Either<Exception, UserEntity?> {
-        // TODO("Not yet implemented")
         return Either.Right(null)
     }
 
     override suspend fun getUserByName(userName: String): Either<Exception, List<UserEntity>> {
-        // TODO("Not yet implemented")
         return Either.Right(emptyList())
-    }
-
-    private suspend fun cashedUser(user: UserEntity) {
-        dao.insertUser(user)
-    }
-
-    private suspend fun cashedAllUsers(users: List<UserEntity>?) {
-        users?.let {
-            dao.deleteAllUsers()
-            users.forEach { user ->
-                dao.insertUser(user)
-            }
-        }
     }
 
 }

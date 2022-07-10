@@ -42,7 +42,7 @@ fun <T> ChoiceDialog(
         AlertDialog(
             onDismissRequest = {
                 dialogState.value = false
-                onDismiss.invoke()
+                onDismiss()
             },
             title = {
                 Text(
@@ -95,7 +95,7 @@ fun <T> ChoiceDialog(
                         .padding(16.dp)
                         .clickable {
                             dialogState.value = false
-                            onDismiss.invoke()
+                            onDismiss()
                         })
             },
         )
